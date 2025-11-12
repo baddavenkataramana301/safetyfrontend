@@ -434,15 +434,17 @@ const UserManagement = () => {
           "Group Name": group.name,
           Members: getMemberNames(group.members),
           "Member Count": group.members.length,
-          Permissions: Object.keys(group.permissions)
-            .filter(
-              (key) =>
-                group.permissions[key] &&
-                (typeof group.permissions[key] === "boolean" ||
-                  group.permissions[key].read ||
-                  group.permissions[key].create)
-            )
-            .join(", "),
+          Permissions: group.permissions && typeof group.permissions === "object"
+            ? Object.keys(group.permissions)
+                .filter(
+                  (key) =>
+                    group.permissions[key] &&
+                    (typeof group.permissions[key] === "boolean" ||
+                      group.permissions[key].read ||
+                      group.permissions[key].create)
+                )
+                .join(", ")
+            : "No permissions set",
           "Created Date": new Date(group.createdAt).toLocaleDateString(),
         }));
         filename = "groups";
@@ -906,7 +908,7 @@ const UserManagement = () => {
                           <div className="space-y-2">
                             <Label>Permissions (if no group selected)</Label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {Object.keys(formData.permissions).map(
+                              {Object.keys(formData.permissions || {}).map(
                                 (section) => {
                                   const perms = formData.permissions[section];
                                   return (
@@ -1280,7 +1282,7 @@ const UserManagement = () => {
                       <div className="space-y-2">
                         <Label>Permissions</Label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {Object.keys(groupFormData.permissions).map(
+                          {Object.keys(groupFormData.permissions || {}).map(
                             (section) => {
                               const perms =
                                 groupFormData.permissions[section];
@@ -1518,21 +1520,23 @@ const UserManagement = () => {
                           </TableCell>
                           <TableCell className="whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">
                             <div className="flex flex-wrap gap-1">
-                              {Object.entries(group.permissions).map(
-                                ([key, value]) =>
-                                  value &&
-                                  (typeof value === "boolean" ||
-                                    value.read ||
-                                    value.create) ? (
-                                    <Badge
-                                      key={key}
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {key.replace("_", " ")}
-                                    </Badge>
-                                  ) : null
-                              )}
+                              {group.permissions && typeof group.permissions === "object"
+                                ? Object.entries(group.permissions).map(
+                                    ([key, value]) =>
+                                      value &&
+                                      (typeof value === "boolean" ||
+                                        value.read ||
+                                        value.create) ? (
+                                        <Badge
+                                          key={key}
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          {key.replace("_", " ")}
+                                        </Badge>
+                                      ) : null
+                                  )
+                                : "No permissions set"}
                             </div>
                           </TableCell>
                           <TableCell className="whitespace-nowrap text-xs sm:text-sm hidden md:table-cell">
@@ -1608,7 +1612,7 @@ const UserManagement = () => {
                     <div className="space-y-2">
                       <Label>Permissions</Label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {Object.keys(groupFormData.permissions).map((perm) => (
+                        {Object.keys(groupFormData.permissions || {}).map((perm) => (
                           <div key={perm} className="flex items-center space-x-2">
                             <input
                               type="checkbox"

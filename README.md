@@ -8,11 +8,12 @@ A modern, full-featured safety management system designed for workplaces to stre
 ## Features
 
 - **User Management**: Role-based access control for admins, safety managers, supervisors, and employees. Admins can view and manage all registered users in the User Management section, with real-time updates in the admin dashboard showing total user counts.
+- **Group Management**: Create and manage user groups with customizable permissions, member assignments, and group-specific notifications.
 - **Hazard Reporting**: Real-time hazard identification and reporting system
 - **Safety Checklists**: Customizable checklists for different departments and roles
 - **Incident Management**: Comprehensive incident tracking and analysis
 - **Training Management**: Track and manage employee training programs
-- **Notifications**: Automated alerts and notifications for safety concerns
+- **Notifications**: Automated alerts and notifications for safety concerns, including group-specific notifications
 - **Analytics & Reports**: Data-driven insights for safety performance using charts and graphs
 - **System Settings**: Customizable theme and system configuration
 - **System Theme**: Dark/light mode support
@@ -76,14 +77,17 @@ The application includes demo accounts for testing different user roles. Use the
 ```
 src/
 ├── components/          # Reusable UI components
-│   ├── layout/         # Layout components (Dashboard, Sidebar, Navbar)
-│   ├── ui/            # shadcn/ui components
-│   └── ...
-├── contexts/           # React contexts (Auth, Theme)
-├── hooks/             # Custom React hooks
-├── lib/               # Utility functions
-├── pages/             # Page components
-└── ...
+│   ├── layout/         # Layout components (Dashboard, Sidebar, Navbar, Footer, Topbar)
+│   ├── ui/            # shadcn/ui components (accordion, alert, button, etc.)
+│   └── ...            # Other components (About, AuthModal, Contact, etc.)
+├── contexts/           # React contexts (AuthContext)
+├── hooks/             # Custom React hooks (use-mobile, use-toast)
+├── lib/               # Utility functions (notificationUtils, permissionUtils, utils)
+├── pages/             # Page components (Dashboard, Login, UserManagement, etc.)
+├── data.js            # Static data definitions
+├── App.jsx            # Main App component
+├── main.jsx           # Application entry point
+└── vite-env.d.js      # Vite environment types
 ```
 
 ## Available Scripts
