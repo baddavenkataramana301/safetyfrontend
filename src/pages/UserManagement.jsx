@@ -63,6 +63,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { DepartmentsPanel } from "@/pages/Departments";
 import { dummyUsers } from "@/data";
 import jsPDF from "jspdf";
 import {
@@ -267,6 +268,17 @@ const UserManagement = () => {
     const updatedUsers = [...users, newUser];
     setUsers(updatedUsers);
     localStorage.setItem("dummyUsers", JSON.stringify(updatedUsers));
+    // If user was added to a group, update that group's members list
+    if (newUser.groupId) {
+      const updatedGroups = groups.map((g) =>
+        g.id === newUser.groupId
+          ? { ...g, members: Array.isArray(g.members) ? [...g.members, newUser.id] : [newUser.id] }
+          : g
+      );
+      setGroups(updatedGroups);
+      localStorage.setItem("groups", JSON.stringify(updatedGroups));
+      window.dispatchEvent(new Event("groupsUpdated"));
+    }
     window.dispatchEvent(new Event("usersUpdated"));
     setFormData({
       name: "",
@@ -320,6 +332,30 @@ const UserManagement = () => {
     );
     setUsers(updatedUsers);
     localStorage.setItem("dummyUsers", JSON.stringify(updatedUsers));
+    // If group membership changed while editing, update groups accordingly
+    try {
+      const originalGroupId = editingUser.groupId || null;
+      const updatedUser = updatedUsers.find((u) => u.id === editingUser.id);
+      const newGroupId = updatedUser.groupId || null;
+      if (originalGroupId !== newGroupId) {
+        const newGroups = groups.map((g) => {
+          // remove from original group
+          if (originalGroupId && g.id === originalGroupId) {
+            return { ...g, members: (g.members || []).filter((id) => id !== editingUser.id) };
+          }
+          // add to new group
+          if (newGroupId && g.id === newGroupId) {
+            return { ...g, members: Array.isArray(g.members) ? Array.from(new Set([...g.members, editingUser.id])) : [editingUser.id] };
+          }
+          return g;
+        });
+        setGroups(newGroups);
+        localStorage.setItem("groups", JSON.stringify(newGroups));
+        window.dispatchEvent(new Event("groupsUpdated"));
+      }
+    } catch (err) {
+      console.error("Error updating group membership on edit:", err);
+    }
     setFormData({
       name: "",
       email: "",
@@ -340,6 +376,15 @@ const UserManagement = () => {
     const updatedUsers = users.filter((user) => user.id !== id);
     setUsers(updatedUsers);
     localStorage.setItem("dummyUsers", JSON.stringify(updatedUsers));
+    // Remove user from any group members arrays
+    try {
+      const updatedGroups = groups.map((g) => ({ ...g, members: (g.members || []).filter((mid) => mid !== id) }));
+      setGroups(updatedGroups);
+      localStorage.setItem("groups", JSON.stringify(updatedGroups));
+      window.dispatchEvent(new Event("groupsUpdated"));
+    } catch (err) {
+      console.error("Error removing user from groups:", err);
+    }
     createUserNotification("delete", userToDelete);
     toast.success("User deleted successfully");
   };
@@ -747,10 +792,14 @@ const UserManagement = () => {
         </div>
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsList className="grid w-full max-w-md grid-cols-4 items-center">
             <TabsTrigger value="approvals">Approvals</TabsTrigger>
-            <TabsTrigger value="groups">Groups</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+             <TabsTrigger value="groups">Groups</TabsTrigger>
+            {/* Departments tab for admins */}
+            {loggedInUser?.role === "admin" && (
+              <TabsTrigger value="departments">Departments</TabsTrigger>
+            )}
           </TabsList>
 
           {/* ============ USERS TAB ============ */}
@@ -1218,6 +1267,11 @@ const UserManagement = () => {
             )}
           </TabsContent>
 
+          {/* ============ DEPARTMENTS TAB ============ */}
+          <TabsContent value="departments" className="space-y-6">
+            <DepartmentsPanel />
+          </TabsContent>
+
           {/* ============ GROUPS TAB ============ */}
           <TabsContent value="groups" className="space-y-6">
             <div className="flex justify-between items-center">
@@ -1268,15 +1322,17 @@ const UserManagement = () => {
                             readOnly
                             className="flex-1"
                           />
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              setIsMemberSelectionDialogOpen(true)
-                            }
-                            className="w-full sm:w-auto"
-                          >
-                            Select Members
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() =>
+                                setIsMemberSelectionDialogOpen(true)
+                              }
+                              className="w-full sm:w-auto"
+                            >
+                              Select Members
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       <div className="space-y-2">

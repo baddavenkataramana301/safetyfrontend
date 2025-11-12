@@ -20,6 +20,7 @@ import Analytics from "./pages/Analytics";
 import Users from "./pages/Users";
 import UserManagement from "./pages/UserManagement";
 import Groups from "./pages/Groups";
+import Departments from "./pages/Departments";
 import SystemSettings from "./pages/SystemSettings";
 import SystemTheme from "./pages/SystemTheme";
 import Training from "./pages/Training";
@@ -147,6 +148,15 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Groups />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/departments"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Departments />
                 </ProtectedRoute>
               }
             />

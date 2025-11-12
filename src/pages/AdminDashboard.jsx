@@ -19,6 +19,7 @@ import {
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
@@ -35,6 +36,22 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import jsPDF from "jspdf";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -43,6 +60,15 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState(() => {
     const stored = localStorage.getItem("dummyUsers");
     return stored ? JSON.parse(stored) : [];
+  });
+  const [groups, setGroups] = useState(() => {
+    const stored = localStorage.getItem("groups");
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const [downloadOptions, setDownloadOptions] = useState({
+    dataType: "all", // all, users, groups, hazards
+    fileFormat: "pdf", // pdf, excel, json
   });
 
   // Load hazards from localStorage
@@ -134,15 +160,247 @@ const AdminDashboard = () => {
     { month: "Jun", compliance: 96 },
   ];
 
+  // Analytics content merged into Admin Dashboard
+  const kpis = [
+    { label: "Total Hazards (YTD)", value: "90", change: "-12%" },
+    { label: "Checklist Completion", value: "87.5%", change: "+5%" },
+    { label: "Training Compliance", value: "94%", change: "+2%" },
+    { label: "Open Incidents", value: "4", change: "-50%" },
+  ];
+
+  const incidentData = [
+    { name: "Slip/Fall", value: 35 },
+    { name: "Electrical", value: 20 },
+    { name: "Chemical", value: 15 },
+    { name: "Machinery", value: 30 },
+  ];
+
+  const checklistData = [
+    { week: "Week 1", completed: 85 },
+    { week: "Week 2", completed: 92 },
+    { week: "Week 3", completed: 78 },
+    { week: "Week 4", completed: 95 },
+  ];
+
+  const COLORS = [
+    "hsl(var(--chart-1))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+    "hsl(var(--chart-4))",
+  ];
+
+  const performDownload = (options = downloadOptions) => {
+    try {
+      const { dataType, fileFormat } = options;
+
+      // collect data
+      const storedUsers = users || [];
+      const storedGroups = groups || [];
+      const storedHazards = hazards || [];
+
+      let data;
+      let filename = "report";
+
+      if (dataType === "users") {
+        data = storedUsers.map((u) => ({
+          Name: u.name,
+          Email: u.email,
+          Role: u.role,
+          Department: u.department,
+          Status: u.status,
+          Approved: u.approved ? "Yes" : "No",
+        }));
+        filename = "users";
+      } else if (dataType === "groups") {
+        data = storedGroups.map((g) => ({
+          Name: g.name,
+          Members: Array.isArray(g.members) ? g.members.length : 0,
+          CreatedAt: g.createdAt || "",
+        }));
+        filename = "groups";
+      } else if (dataType === "hazards") {
+        data = storedHazards.map((h) => ({
+          Title: h.title || h.name || "-",
+          Status: h.status || "",
+          CreatedAt: h.createdAt || "",
+        }));
+        filename = "hazards";
+      } else {
+        // all
+        data = { users: storedUsers, groups: storedGroups, hazards: storedHazards };
+        filename = "full-report";
+      }
+
+      // export based on format
+      if (fileFormat === "json") {
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${filename}.json`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } else if (fileFormat === "excel") {
+        // CSV
+        if (!Array.isArray(data)) {
+          // flatten object sections into rows with section header
+          const sections = [];
+          Object.entries(data).forEach(([section, arr]) => {
+            if (Array.isArray(arr) && arr.length) {
+              const headers = Object.keys(arr[0]);
+              sections.push(headers.join(","));
+              arr.forEach((row) => {
+                sections.push(
+                  headers
+                    .map((h) => `"${String(row[h] ?? "").replace(/"/g, '""')}"`)
+                    .join(",")
+                );
+              });
+              sections.push("");
+            }
+          });
+          const csv = sections.join("\n");
+          const blob = new Blob([csv], { type: "text/csv" });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${filename}.csv`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        } else {
+          const headers = Object.keys(data[0] || {});
+          const csv = [
+            headers.join(","),
+            ...data.map((row) =>
+              headers
+                .map((header) => `"${String(row[header] ?? "").replace(/"/g, '""')}"`)
+                .join(",")
+            ),
+          ].join("\n");
+          const blob = new Blob([csv], { type: "text/csv" });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${filename}.csv`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }
+      } else if (fileFormat === "pdf") {
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("Safety Report", 14, 20);
+        let y = 30;
+        const writeSection = (title, arr) => {
+          doc.setFontSize(14);
+          doc.text(title, 14, y);
+          y += 8;
+          if (!arr || arr.length === 0) {
+            doc.setFontSize(11);
+            doc.text("No records", 14, y);
+            y += 8;
+            return;
+          }
+          const headers = Object.keys(arr[0]);
+          doc.setFontSize(11);
+          doc.text(headers.join(" | "), 14, y);
+          y += 6;
+          arr.forEach((row) => {
+            const line = headers.map((h) => String(row[h] ?? "")).join(" | ");
+            const sliced = doc.splitTextToSize(line, 180);
+            doc.text(sliced, 14, y);
+            y += sliced.length * 6;
+            if (y > 270) {
+              doc.addPage();
+              y = 20;
+            }
+          });
+          y += 6;
+        };
+
+        if (dataType === "all") {
+          writeSection("Users", data.users.map((u) => ({ Name: u.name, Email: u.email, Role: u.role, Department: u.department, Approved: u.approved ? 'Yes' : 'No' })));
+          if (y > 250) { doc.addPage(); y = 20; }
+          writeSection("Groups", data.groups.map((g) => ({ Name: g.name, Members: Array.isArray(g.members) ? g.members.length : 0, CreatedAt: g.createdAt || '' })));
+          if (y > 250) { doc.addPage(); y = 20; }
+          writeSection("Hazards", data.hazards.map((h) => ({ Title: h.title || h.name || '-', Status: h.status || '', CreatedAt: h.createdAt || '' })));
+        } else if (Array.isArray(data)) {
+          writeSection(filename.charAt(0).toUpperCase() + filename.slice(1), data);
+        }
+
+        doc.save(`${filename}.pdf`);
+      }
+
+      setIsDownloadDialogOpen(false);
+      toast.success(`Downloaded ${filename} as ${fileFormat.toUpperCase()}`);
+    } catch (err) {
+      console.error("Download error:", err);
+      toast.error("Failed to download. See console for details.");
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="text-center md:text-left relative">
-          <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground text-sm md:text-base">
-            Welcome back, {user?.name}! Full system overview and management
-            controls.
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-muted-foreground text-sm md:text-base">
+              Welcome back, {user?.name}! Full system overview and management
+              controls.
+            </p>
+          </div>
+          <div className="flex items-start ml-4">
+            <Dialog open={isDownloadDialogOpen} onOpenChange={setIsDownloadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => setIsDownloadDialogOpen(true)} variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Report
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Download Report</DialogTitle>
+                  <DialogDescription>
+                    Choose data and file format for the export
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm mb-2">What to include?</p>
+                    <Select value={downloadOptions.dataType} onValueChange={(value) => setDownloadOptions({...downloadOptions, dataType: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Data</SelectItem>
+                        <SelectItem value="users">Users</SelectItem>
+                        <SelectItem value="groups">Groups</SelectItem>
+                        <SelectItem value="hazards">Hazards</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <p className="text-sm mb-2">File format</p>
+                    <Select value={downloadOptions.fileFormat} onValueChange={(value) => setDownloadOptions({...downloadOptions, fileFormat: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pdf">PDF</SelectItem>
+                        <SelectItem value="excel">Excel (CSV)</SelectItem>
+                        <SelectItem value="json">JSON</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setIsDownloadDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={() => performDownload(downloadOptions)}>Download</Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -161,6 +419,23 @@ const AdminDashboard = () => {
               <CardContent className="flex-1">
                 <div className="text-2xl font-bold">{stat.value}</div>
                 <p className="text-xs text-muted-foreground">Click to manage</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* KPIs (merged from Analytics) */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {kpis.map((kpi) => (
+            <Card key={kpi.label}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{kpi.value}</div>
+                <p className={`text-xs mt-1 ${kpi.change.startsWith('+') ? 'text-success' : 'text-destructive'}`}>
+                  {kpi.change} from last month
+                </p>
               </CardContent>
             </Card>
           ))}
@@ -191,17 +466,7 @@ const AdminDashboard = () => {
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute bottom-4 right-4"
-              onClick={() => {
-                toast.success("Hazard Trends report download coming soon!");
-              }}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download
-            </Button>
+            {/* Download moved to top-right */}
           </Card>
 
           <Card className="h-full w-full relative">
@@ -240,14 +505,61 @@ const AdminDashboard = () => {
               size="sm"
               className="absolute bottom-4 right-4"
               onClick={() => {
-                toast.success(
-                  "Training Distribution report download coming soon!"
-                );
+                /* Download moved to top-right */
               }}
             >
               <Download className="h-4 w-4 mr-2" />
               Download
             </Button>
+          </Card>
+        </div>
+
+        {/* Additional Reports Section (incident distribution & checklist completion) */}
+        <div id="reports" className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Incident Distribution</CardTitle>
+              <CardDescription>Breakdown by incident type</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={incidentData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {incidentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="md:col-span-1">
+            <CardHeader>
+              <CardTitle>Checklist Completion Rate</CardTitle>
+              <CardDescription>Weekly completion percentage</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={checklistData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="week" className="text-xs" />
+                  <YAxis className="text-xs" domain={[0, 100]} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="completed" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ fill: 'hsl(var(--chart-2))' }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
           </Card>
         </div>
 
@@ -278,7 +590,7 @@ const AdminDashboard = () => {
               size="sm"
               className="absolute bottom-4 right-4"
               onClick={() => {
-                toast.success("Compliance Trends report download coming soon!");
+                /* Download moved to top-right */
               }}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -311,7 +623,7 @@ const AdminDashboard = () => {
                   System Settings
                 </Button>
                 <Button
-                  onClick={() => navigate("/analytics")}
+                  onClick={() => { window.location.hash = '#reports'; }}
                   variant="outline"
                   className="w-full justify-start flex-shrink-0 sm:w-auto"
                 >
@@ -320,17 +632,17 @@ const AdminDashboard = () => {
                 </Button>
               </div>
             </CardContent>
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute bottom-4 right-4"
-              onClick={() => {
-                toast.success("System Management report download coming soon!");
-              }}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download
-            </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute bottom-4 right-4"
+                  onClick={() => {
+                    /* Download moved to top-right */
+                  }}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
           </Card>
 
           <Card className="h-full relative">

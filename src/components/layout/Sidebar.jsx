@@ -34,7 +34,7 @@ export const Sidebar = () => {
           { to: "/training", icon: GraduationCap, label: "Training" },
           { to: "/checklists", icon: CheckSquare, label: "Checklists" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
-          { to: "/analytics", icon: BarChart3, label: "Reports" },
+          // Reports moved into Dashboard; remove separate Reports link
         ];
       case "safety_manager":
         return [
@@ -47,7 +47,7 @@ export const Sidebar = () => {
           { to: "/hazards", icon: AlertTriangle, label: "HIRA" },
           { to: "/checklists", icon: CheckSquare, label: "Checklists" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
-          { to: "/analytics", icon: BarChart3, label: "Analytics" },
+          // Analytics moved into Dashboard
           { to: "/alerts", icon: ShieldAlert, label: "Alerts" },
         ];
       case "supervisor":
@@ -61,7 +61,7 @@ export const Sidebar = () => {
           { to: "/hazards", icon: AlertTriangle, label: "HIRA" },
           { to: "/checklists", icon: CheckSquare, label: "Checklists" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
-          { to: "/analytics", icon: BarChart3, label: "Analytics" },
+          // Analytics moved into Dashboard
           { to: "/alerts", icon: ShieldAlert, label: "Alerts" },
         ];
       case "employee":
