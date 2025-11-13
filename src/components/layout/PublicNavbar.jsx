@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ShieldAlert, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { AuthModal } from '@/components/AuthModal';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ShieldAlert, Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
 
 export const PublicNavbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -11,19 +11,19 @@ export const PublicNavbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getRoleDashboardLink = () => {
-    if (!user) return { path: '/dashboard', label: 'Dashboard' };
-    
+    if (!user) return { path: "/", label: "Dashboard" };
+
     switch (user.role) {
-      case 'admin':
-        return { path: '/dashboard', label: 'Admin Panel' };
-      case 'safety_manager':
-        return { path: '/dashboard', label: 'Manager Dashboard' };
-      case 'supervisor':
-        return { path: '/dashboard', label: 'Team Dashboard' };
-      case 'employee':
-        return { path: '/dashboard', label: 'My Work' };
+      case "admin":
+        return { path: "/admin-dashboard", label: "Admin Panel" };
+      case "safety_manager":
+        return { path: "/manager-dashboard", label: "Manager Dashboard" };
+      case "supervisor":
+        return { path: "/supervisor-dashboard", label: "Team Dashboard" };
+      case "employee":
+        return { path: "/employee-dashboard", label: "My Work" };
       default:
-        return { path: '/dashboard', label: 'Dashboard' };
+        return { path: "/", label: "Dashboard" };
     }
   };
 
@@ -40,37 +40,54 @@ export const PublicNavbar = () => {
         <div className="container mx-auto px-4 py-4">
           <nav className="flex justify-between items-center">
             {/* Logo */}
-            <Link to={isAuthenticated ? "/home" : "/"} className="flex items-center gap-2">
+            <Link
+              to={isAuthenticated ? getRoleDashboardLink().path : "/"}
+              className="flex items-center gap-2"
+            >
               <ShieldAlert className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">SafetyMS</span>
+              <span className="text-xl font-bold">VSMS</span>
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-6">
-              <a href="#home" className="text-foreground hover:text-primary transition-colors">
+              <a
+                href="#home"
+                className="text-foreground hover:text-primary transition-colors"
+              >
                 Home
               </a>
-              <a href="#about" className="text-foreground hover:text-primary transition-colors">
+              <a
+                href="#about"
+                className="text-foreground hover:text-primary transition-colors"
+              >
                 About
               </a>
-              <a href="#services" className="text-foreground hover:text-primary transition-colors">
+              <a
+                href="#services"
+                className="text-foreground hover:text-primary transition-colors"
+              >
                 Services
               </a>
-              <a href="#contact" className="text-foreground hover:text-primary transition-colors">
+              <a
+                href="#contact"
+                className="text-foreground hover:text-primary transition-colors"
+              >
                 Contact
               </a>
-              
-              {isAuthenticated && (
-                user?.role === 'employee' && !user?.approved ? (
+
+              {isAuthenticated &&
+                (user?.role === "employee" && !user?.approved ? (
                   <span className="text-foreground/60 font-medium">
                     My Work (Pending Approval)
                   </span>
                 ) : (
-                  <Link to={dashboardLink.path} className="text-foreground hover:text-primary transition-colors font-medium">
+                  <Link
+                    to={dashboardLink.path}
+                    className="text-foreground hover:text-primary transition-colors font-medium"
+                  >
                     {dashboardLink.label}
                   </Link>
-                )
-              )}
+                ))}
 
               {isAuthenticated ? (
                 <Button onClick={handleLogout} variant="outline">
@@ -88,44 +105,48 @@ export const PublicNavbar = () => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2"
             >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </nav>
 
-            {/* Mobile Navigation */}
-            {isMobileMenuOpen && (
-              <div className="md:hidden mt-4 pb-4 space-y-3 animate-fade-in">
-                <a 
-                  href="#home" 
-                  className="block py-2 text-foreground hover:text-primary transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Home
-                </a>
-                <a 
-                  href="#about" 
-                  className="block py-2 text-foreground hover:text-primary transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  About
-                </a>
-                <a 
-                  href="#services" 
-                  className="block py-2 text-foreground hover:text-primary transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Services
-                </a>
-                <a 
-                  href="#contact" 
-                  className="block py-2 text-foreground hover:text-primary transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Contact
-                </a>
-              
-              {isAuthenticated && (
-                user?.role === 'employee' && !user?.approved ? (
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden mt-4 pb-4 space-y-3 animate-fade-in">
+              <a
+                href="#home"
+                className="block py-2 text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Home
+              </a>
+              <a
+                href="#about"
+                className="block py-2 text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                About
+              </a>
+              <a
+                href="#services"
+                className="block py-2 text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Services
+              </a>
+              <a
+                href="#contact"
+                className="block py-2 text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Contact
+              </a>
+
+              {isAuthenticated &&
+                (user?.role === "employee" && !user?.approved ? (
                   <span className="block py-2 text-foreground/60 font-medium">
                     My Work (Pending Approval)
                   </span>
@@ -137,19 +158,22 @@ export const PublicNavbar = () => {
                   >
                     {dashboardLink.label}
                   </Link>
-                )
-              )}
+                ))}
 
               {isAuthenticated ? (
-                <Button onClick={handleLogout} variant="outline" className="w-full">
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="w-full"
+                >
                   Logout
                 </Button>
               ) : (
-                <Button 
+                <Button
                   onClick={() => {
                     setIsModalOpen(true);
                     setIsMobileMenuOpen(false);
-                  }} 
+                  }}
                   className="w-full"
                 >
                   Login / Register

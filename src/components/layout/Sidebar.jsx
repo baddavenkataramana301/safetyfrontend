@@ -98,12 +98,10 @@ export const Sidebar = () => {
       <div className="p-3 md:p-6 border-b border-sidebar-border">
         <NavLink to="/home" className="flex items-center gap-2 cursor-pointer">
           <div className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm md:text-base">
-            S
+            V
           </div>
           <div className="hidden md:block">
-            <h1 className="text-xl font-bold text-sidebar-foreground">
-              SafetyMS
-            </h1>
+            <h1 className="text-xl font-bold text-sidebar-foreground">VSMS</h1>
             <p className="text-xs text-sidebar-foreground/80 capitalize">
               {user?.role?.replace("_", " ")}
             </p>

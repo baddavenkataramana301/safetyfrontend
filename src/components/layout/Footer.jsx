@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { ShieldAlert, Mail, Phone, MapPin } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { ShieldAlert, Mail, Phone, MapPin } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -8,12 +8,16 @@ export const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="flex items-center gap-2"
+            >
               <ShieldAlert className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">SafetyMS</span>
+              <span className="text-xl font-bold">VSMS</span>
             </button>
             <p className="text-sm text-muted-foreground">
-              Comprehensive Safety Management System for modern workplaces. Streamline your EHS processes and create a safer environment.
+              Comprehensive Safety Management System for modern workplaces.
+              Streamline your EHS processes and create a safer environment.
             </p>
           </div>
 
@@ -22,22 +26,36 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <button
+                  onClick={() =>
+                    window.scrollTo({ top: 0, behavior: "smooth" })
+                  }
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Home
                 </button>
               </li>
               <li>
-                <a href="#about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <a
+                  href="#about"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   About Us
                 </a>
               </li>
               <li>
-                <a href="#services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <a
+                  href="#services"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Services
                 </a>
               </li>
               <li>
-                <a href="#contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <a
+                  href="#contact"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Contact
                 </a>
               </li>
