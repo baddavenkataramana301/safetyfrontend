@@ -16,6 +16,7 @@ import {
   ChevronDown,
   ShieldAlert,
   UserCheck,
+  Award,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ export const Sidebar = () => {
           { to: "/hazards", icon: AlertTriangle, label: "HIRA" },
           { to: "/training", icon: GraduationCap, label: "Training" },
           { to: "/checklists", icon: CheckSquare, label: "Checklists" },
+          { to: "/rewards", icon: Award, label: "Rewards" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
           // Reports moved into Dashboard; remove separate Reports link
         ];
@@ -46,6 +48,7 @@ export const Sidebar = () => {
           { to: "/groups", icon: UserCheck, label: "My Groups" },
           { to: "/hazards", icon: AlertTriangle, label: "HIRA" },
           { to: "/checklists", icon: CheckSquare, label: "Checklists" },
+          { to: "/rewards", icon: Award, label: "Rewards" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
           // Analytics moved into Dashboard
           { to: "/alerts", icon: ShieldAlert, label: "Alerts" },
@@ -69,6 +72,7 @@ export const Sidebar = () => {
           { to: "/groups", icon: UserCheck, label: "My Groups" },
           { to: "/hazards", icon: AlertTriangle, label: "Report HIRA" },
           { to: "/alerts", icon: ShieldAlert, label: "Alerts" },
+          { to: "/rewards", icon: Award, label: "My Rewards" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
           {
             to: user?.approved ? "/checklists" : null,

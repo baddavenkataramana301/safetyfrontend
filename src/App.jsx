@@ -24,6 +24,7 @@ import SystemSettings from "./pages/SystemSettings";
 import SystemTheme from "./pages/SystemTheme";
 import Training from "./pages/Training";
 import Alerts from "./pages/Alerts";
+import Rewards from "./pages/Rewards";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
@@ -185,6 +186,17 @@ const App = () => (
                   allowedRoles={["safety_manager", "supervisor", "employee"]}
                 >
                   <Alerts />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/rewards"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["admin", "safety_manager", "employee"]}
+                >
+                  <Rewards />
                 </ProtectedRoute>
               }
             />

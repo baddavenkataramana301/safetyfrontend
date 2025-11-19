@@ -1,11 +1,12 @@
-# TODO: Update README.md
+# Reward Section UI Implementation
 
 ## Tasks
 
-- [x] Update Features section to include Group Management feature
-- [x] Expand Project Structure section to reflect current file organization (add data.js, vite-env.d.js, hooks/, lib/ subfiles, etc.)
-- [x] Ensure consistency (e.g., align project name with package.json if needed)
-
-## Progress
-
-- [x] Plan approved by user
+- [ ] Add dummyRewards array to src/data.js with sample data
+- [ ] Create src/pages/Rewards.jsx component with role-based rendering
+- [ ] Add /rewards route to src/App.jsx with role-based protection
+- [ ] Add Rewards navigation to src/components/layout/Sidebar.jsx
+- [ ] Test role-based UI and permissions
+- [ ] Verify mobile responsiveness
+- [ ] Test search, filter, and pagination functionality
+- [ ] Test add/edit modal functionality
