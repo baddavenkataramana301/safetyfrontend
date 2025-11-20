@@ -101,22 +101,22 @@ export const createChecklistNotification = (action, checklistData) => {
   switch (action) {
     case "create":
       title = "New Checklist Created";
-      message = `A new checklist "${checklistData.title}" has been created for ${checklistData.department} department.`;
+      message = `A new checklist has been created for location "${checklistData.location}".`;
       type = "info";
       break;
     case "update":
       title = "Checklist Updated";
-      message = `Checklist "${checklistData.title}" has been updated.`;
+      message = `Checklist for location "${checklistData.location}" has been updated.`;
       type = "warning";
       break;
     case "complete":
       title = "Checklist Completed";
-      message = `Checklist "${checklistData.title}" has been completed.`;
+      message = `Checklist for location "${checklistData.location}" has been completed.`;
       type = "success";
       break;
     case "delete":
       title = "Checklist Removed";
-      message = `Checklist "${checklistData.title}" has been removed.`;
+      message = `Checklist for location "${checklistData.location}" has been removed.`;
       type = "alert";
       break;
     default:

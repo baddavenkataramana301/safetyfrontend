@@ -49,6 +49,7 @@ const ManagerDashboard = () => {
   const navigate = useNavigate();
   const [hazards, setHazards] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [checklists, setChecklists] = useState([]);
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
   const [approvalAction, setApprovalAction] = useState(""); // "approve" or "reject"
   const [currentHazardId, setCurrentHazardId] = useState(null);
@@ -59,11 +60,16 @@ const ManagerDashboard = () => {
     remarks: "",
   });
 
-  // Load hazards and notifications from localStorage
+  // Load hazards, checklists, and notifications from localStorage
   useEffect(() => {
     const storedHazards = localStorage.getItem("hazards");
     if (storedHazards) {
       setHazards(JSON.parse(storedHazards));
+    }
+
+    const storedChecklists = localStorage.getItem("checklists");
+    if (storedChecklists) {
+      setChecklists(JSON.parse(storedChecklists));
     }
 
     const loadNotifications = () => {
@@ -75,10 +81,14 @@ const ManagerDashboard = () => {
 
     loadNotifications();
 
-    // Listen for storage changes to update notifications in real-time
+    // Listen for storage changes to update notifications and checklists in real-time
     const handleStorageChange = (e) => {
       if (e.key === "notifications") {
         loadNotifications();
+      }
+      if (e.key === "checklists") {
+        const stored = localStorage.getItem("checklists");
+        setChecklists(stored ? JSON.parse(stored) : []);
       }
     };
 
@@ -238,6 +248,10 @@ const ManagerDashboard = () => {
     doc.save("manager-analytics-report.pdf");
   };
 
+  const completedChecklists = checklists.filter(
+    (c) => c.status === "completed"
+  ).length;
+
   const stats = [
     {
       label: "Team Hazards",
@@ -248,7 +262,7 @@ const ManagerDashboard = () => {
     },
     {
       label: "Completed Checklists",
-      value: "32", // This could be dynamic if checklists are stored
+      value: completedChecklists.toString(),
       icon: CheckCircle,
       color: "text-success",
       action: () => navigate("/checklists"),

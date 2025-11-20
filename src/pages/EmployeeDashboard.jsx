@@ -38,14 +38,20 @@ const EmployeeDashboard = () => {
   const navigate = useNavigate();
   const [hazards, setHazards] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [checklists, setChecklists] = useState([]);
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
   const [groups, setGroups] = useState([]);
 
-  // Load hazards and notifications from localStorage
+  // Load hazards, checklists, and notifications from localStorage
   useEffect(() => {
     const storedHazards = localStorage.getItem("hazards");
     if (storedHazards) {
       setHazards(JSON.parse(storedHazards));
+    }
+
+    const storedChecklists = localStorage.getItem("checklists");
+    if (storedChecklists) {
+      setChecklists(JSON.parse(storedChecklists));
     }
 
     const loadNotifications = () => {
@@ -63,10 +69,14 @@ const EmployeeDashboard = () => {
       setGroups(JSON.parse(storedGroups));
     }
 
-    // Listen for storage changes to update notifications in real-time
+    // Listen for storage changes to update notifications and checklists in real-time
     const handleStorageChange = (e) => {
       if (e.key === "notifications") {
         loadNotifications();
+      }
+      if (e.key === "checklists") {
+        const stored = localStorage.getItem("checklists");
+        setChecklists(stored ? JSON.parse(stored) : []);
       }
       if (e.key === "groups") {
         const stored = localStorage.getItem("groups");
