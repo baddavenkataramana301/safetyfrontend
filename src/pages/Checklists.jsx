@@ -4,6 +4,8 @@ import { Plus } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { createChecklistNotification } from "@/lib/notificationUtils";
+import { getUserPermissions } from "@/lib/permissionUtils";
+import { dummyChecklistData } from "@/data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +35,7 @@ import {
 
 const Checklist = () => {
   const { user } = useAuth();
+  const userPermissions = user ? getUserPermissions(user.id) : {};
 
   const [dataSource, setDataSource] = useState([]);
   const [count, setCount] = useState(0);
@@ -56,13 +59,37 @@ const Checklist = () => {
     content: "",
   });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("checklists");
     if (stored) {
       const parsed = JSON.parse(stored);
-      setDataSource(parsed.map((item, idx) => ({ ...item, key: idx + 1 })));
-      setCount(parsed.length);
+      // Filter out empty rows for employees - only show rows with complete data
+      const filteredData = parsed.filter(
+        (row) =>
+          row.location &&
+          row.type &&
+          row.capacity &&
+          row.mfgDate &&
+          row.condition &&
+          row.fireNo &&
+          row.locationCode &&
+          row.remarks
+      );
+      setDataSource(
+        filteredData.map((item, idx) => ({ ...item, key: idx + 1 }))
+      );
+      setCount(filteredData.length);
+    } else {
+      // Load dummy data if no stored data exists - this allows employees to view sample data
+      setDataSource(
+        dummyChecklistData.map((item, idx) => ({ ...item, key: idx + 1 }))
+      );
+      setCount(dummyChecklistData.length);
+      // Save dummy data to localStorage so employees can view it
+      localStorage.setItem("checklists", JSON.stringify(dummyChecklistData));
     }
   }, []);
 
@@ -237,8 +264,36 @@ const Checklist = () => {
 
     setDataSource([...dataSource, newRow]);
     setCount(count + 1);
+    createChecklistNotification("create", newRow);
     toast.success("Row added from form!");
     setCreateDialogOpen(false);
+    setEditMode(false);
+    setSelectedRow(null);
+  };
+
+  const handleUpdateRowFromForm = () => {
+    if (!selectedRow) return;
+
+    const updatedRow = {
+      ...selectedRow,
+      location: formData.location,
+      type: formData.showroomName,
+      capacity: formData.zone,
+      mfgDate: formData.date,
+      fireNo: formData.mobile,
+      locationCode: formData.zone,
+      remarks: `${formData.inspectedBy} - ${formData.designation} - ${formData.inchargeName} - ${formData.mailId}`,
+    };
+
+    const newData = dataSource.map((item) =>
+      item.key === selectedRow.key ? updatedRow : item
+    );
+    setDataSource(newData);
+    handleSave(updatedRow);
+    toast.success("Row updated from form!");
+    setCreateDialogOpen(false);
+    setEditMode(false);
+    setSelectedRow(null);
   };
 
   const columns = [
@@ -302,20 +357,48 @@ const Checklist = () => {
       title: "Operation",
       dataIndex: "operation",
       width: "8%",
-      render: (_, record) =>
-        user?.role === "admin" ? (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => {
-              if (window.confirm("Sure to delete?")) {
-                handleDelete(record.key);
-              }
-            }}
-          >
-            Delete
-          </Button>
-        ) : null,
+      render: (_, record) => (
+        <div className="flex gap-2">
+          {userPermissions.checklists?.update && (
+            <Button
+              size="sm"
+              onClick={() => {
+                setEditMode(true);
+                setSelectedRow(record);
+                setFormData({
+                  location: record.location || "",
+                  date:
+                    record.mfgDate || new Date().toISOString().split("T")[0],
+                  inspectedBy: record.remarks?.split(" - ")[0] || "",
+                  showroomName: record.type || "",
+                  designation: record.remarks?.split(" - ")[1] || "",
+                  inchargeName: record.remarks?.split(" - ")[2] || "",
+                  zone: record.capacity || "",
+                  mobile: record.fireNo || "",
+                  mailId: record.remarks?.split(" - ")[3] || "",
+                });
+                setCreateDialogOpen(true);
+              }}
+            >
+              Edit
+            </Button>
+          )}
+          {userPermissions.checklists?.delete &&
+            user?.role !== "Safety Manager" && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  if (window.confirm("Sure to delete?")) {
+                    handleDelete(record.key);
+                  }
+                }}
+              >
+                Delete
+              </Button>
+            )}
+        </div>
+      ),
     },
   ];
 
@@ -324,139 +407,25 @@ const Checklist = () => {
       <div className="p-6 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Safety Checklists</h2>
-          {user?.role === "admin" && (
+          {userPermissions.checklists?.create && (
             <Button
               onClick={() => setCreateDialogOpen(true)}
               className="flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
-              Create Checklist
+              Create List
             </Button>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <Label htmlFor="location">NAME OF THE LOCATION :</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, location: e.target.value }))
-              }
-              placeholder="Detecting location..."
-              readOnly
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="date">DATE :</Label>
-            <Input
-              id="date"
-              type="date"
-              value={formData.date}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, date: e.target.value }))
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="inspectedBy">INSPECTED BY :</Label>
-            <Input
-              id="inspectedBy"
-              value={formData.inspectedBy}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  inspectedBy: e.target.value,
-                }))
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="showroomName">CHECK POINTS :</Label>
-            <Input
-              id="showroomName"
-              value={formData.showroomName}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  showroomName: e.target.value,
-                }))
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="designation">DESIGNATION :</Label>
-            <Input
-              id="designation"
-              value={formData.designation}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  designation: e.target.value,
-                }))
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="inchargeName">INCHARGE NAME :</Label>
-            <Input
-              id="inchargeName"
-              value={formData.inchargeName}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  inchargeName: e.target.value,
-                }))
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="zone">ZONE :</Label>
-            <Input
-              id="zone"
-              value={formData.zone}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, zone: e.target.value }))
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="mobile">MOBILE NO :</Label>
-            <Input
-              id="mobile"
-              value={formData.mobile}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, mobile: e.target.value }))
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="mailId">MAIL ID :</Label>
-            <Input
-              id="mailId"
-              value={formData.mailId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, mailId: e.target.value }))
-              }
-            />
-          </div>
-        </div>
-
-        <div className="mb-4 flex justify-end">
-          <Button onClick={handleAdd} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Add New Row
-          </Button>
-        </div>
+        {/* <div className="mb-4 flex justify-end">
+          {userPermissions.checklists?.create && user?.role !== "Admin" && (
+            <Button onClick={handleAdd} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add New Row
+            </Button>
+          )}
+        </div> */}
 
         <Table>
           <TableHeader>
@@ -550,14 +519,23 @@ const Checklist = () => {
                     return (
                       <TableCell
                         key={col.dataIndex}
-                        className="cursor-pointer hover:bg-gray-100"
+                        className={
+                          col.editable && userPermissions.checklists?.update
+                            ? "cursor-pointer hover:bg-gray-100"
+                            : ""
+                        }
                         onClick={() =>
                           col.editable &&
+                          userPermissions.checklists?.update &&
                           startEdit(rowIndex, col.dataIndex, value)
                         }
                       >
                         {value || (
-                          <span className="text-gray-400">Click to edit</span>
+                          <span className="text-gray-400">
+                            {col.editable && userPermissions.checklists?.update
+                              ? "Click to edit"
+                              : ""}
+                          </span>
                         )}
                       </TableCell>
                     );
@@ -568,9 +546,11 @@ const Checklist = () => {
           </TableBody>
         </Table>
 
-        <div className="mt-6 text-center">
-          <Button onClick={handleSubmitChecklist}>Submit Checklist</Button>
-        </div>
+        {user?.role !== "Employee" && (
+          <div className="mt-6 text-center">
+            <Button onClick={handleSubmitChecklist}>Submit Checklist</Button>
+          </div>
+        )}
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -588,9 +568,13 @@ const Checklist = () => {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Checklist</DialogTitle>
+            <DialogTitle>
+              {editMode ? "Edit Checklist" : "Create New Checklist"}
+            </DialogTitle>
             <DialogDescription>
-              Fill in the checklist details below.
+              {editMode
+                ? "Update the checklist details below."
+                : "Fill in the checklist details below."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -712,11 +696,21 @@ const Checklist = () => {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setCreateDialogOpen(false)}
+              onClick={() => {
+                setCreateDialogOpen(false);
+                setEditMode(false);
+                setSelectedRow(null);
+              }}
             >
               Cancel
             </Button>
-            <Button onClick={handleAddRowFromForm}>Add to Row</Button>
+            <Button
+              onClick={
+                editMode ? handleUpdateRowFromForm : handleAddRowFromForm
+              }
+            >
+              {editMode ? "Update Row" : "Add to Row"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
