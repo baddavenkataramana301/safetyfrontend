@@ -32,14 +32,13 @@ const Register = () => {
     department: "",
     location: "",
   });
-  
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     console.log(formData);
-    
 
     try {
       if (!formData.role) {
@@ -49,7 +48,6 @@ const Register = () => {
 
       await register({ ...formData, role: formData.role });
       toast.success("Registration successful!");
-      navigate("/dashboard");
     } catch (error) {
       toast.error("Registration failed. Please try again.");
     } finally {

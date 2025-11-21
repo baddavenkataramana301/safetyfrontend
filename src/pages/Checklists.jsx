@@ -55,6 +55,7 @@ const Checklist = () => {
     title: "",
     content: "",
   });
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("checklists");
@@ -220,6 +221,26 @@ const Checklist = () => {
     setDialogOpen(true);
   };
 
+  const handleAddRowFromForm = () => {
+    const newRow = {
+      key: count + 1,
+      id: Date.now(),
+      location: formData.location,
+      type: formData.showroomName,
+      capacity: formData.zone,
+      mfgDate: formData.date,
+      condition: "Pending",
+      fireNo: formData.mobile,
+      locationCode: formData.zone,
+      remarks: `${formData.inspectedBy} - ${formData.designation} - ${formData.inchargeName} - ${formData.mailId}`,
+    };
+
+    setDataSource([...dataSource, newRow]);
+    setCount(count + 1);
+    toast.success("Row added from form!");
+    setCreateDialogOpen(false);
+  };
+
   const columns = [
     {
       title: "SL No",
@@ -281,19 +302,20 @@ const Checklist = () => {
       title: "Operation",
       dataIndex: "operation",
       width: "8%",
-      render: (_, record) => (
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => {
-            if (window.confirm("Sure to delete?")) {
-              handleDelete(record.key);
-            }
-          }}
-        >
-          Delete
-        </Button>
-      ),
+      render: (_, record) =>
+        user?.role === "admin" ? (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              if (window.confirm("Sure to delete?")) {
+                handleDelete(record.key);
+              }
+            }}
+          >
+            Delete
+          </Button>
+        ) : null,
     },
   ];
 
@@ -302,6 +324,15 @@ const Checklist = () => {
       <div className="p-6 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Safety Checklists</h2>
+          {user?.role === "admin" && (
+            <Button
+              onClick={() => setCreateDialogOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Create Checklist
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -550,6 +581,142 @@ const Checklist = () => {
           </DialogHeader>
           <DialogFooter>
             <Button onClick={() => setDialogOpen(false)}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Checklist</DialogTitle>
+            <DialogDescription>
+              Fill in the checklist details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <Label htmlFor="create-location">NAME OF THE LOCATION :</Label>
+              <Input
+                id="create-location"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, location: e.target.value }))
+                }
+                placeholder="Detecting location..."
+                readOnly
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-date">DATE :</Label>
+              <Input
+                id="create-date"
+                type="date"
+                value={formData.date}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, date: e.target.value }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-inspectedBy">INSPECTED BY :</Label>
+              <Input
+                id="create-inspectedBy"
+                value={formData.inspectedBy}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    inspectedBy: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-showroomName">CHECK POINTS :</Label>
+              <Input
+                id="create-showroomName"
+                value={formData.showroomName}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    showroomName: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-designation">DESIGNATION :</Label>
+              <Input
+                id="create-designation"
+                value={formData.designation}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    designation: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-inchargeName">INCHARGE NAME :</Label>
+              <Input
+                id="create-inchargeName"
+                value={formData.inchargeName}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    inchargeName: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-zone">ZONE :</Label>
+              <Input
+                id="create-zone"
+                value={formData.zone}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, zone: e.target.value }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-mobile">MOBILE NO :</Label>
+              <Input
+                id="create-mobile"
+                value={formData.mobile}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, mobile: e.target.value }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-mailId">MAIL ID :</Label>
+              <Input
+                id="create-mailId"
+                value={formData.mailId}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, mailId: e.target.value }))
+                }
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCreateDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleAddRowFromForm}>Add to Row</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -105,8 +105,8 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
 
-    // After login, redirect to home page
-    navigate("/home");
+    // After login, redirect to role-specific dashboard
+    redirectToDashboard(userData.role);
   };
 
   const register = async (userData) => {
@@ -159,6 +159,9 @@ export const AuthProvider = ({ children }) => {
 
     setUser(currentUser);
     localStorage.setItem("user", JSON.stringify(currentUser));
+
+    // After registration, redirect to role-specific dashboard
+    redirectToDashboard(normalizedRole);
   };
 
   const logout = () => {
