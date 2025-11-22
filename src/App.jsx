@@ -1,15 +1,9 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  HashRouter,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ChecklistProvider } from "./contexts/ChecklistContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -20,9 +14,9 @@ import SupervisorDashboard from "./pages/SupervisorDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import Hazards from "./pages/Hazards";
 import Checklists from "./pages/Checklists";
+import CreateList from "./pages/CreateList";
 import Notifications from "./pages/Notifications";
 import Analytics from "./pages/Analytics";
-import Users from "./pages/Users";
 import UserManagement from "./pages/UserManagement";
 import Groups from "./pages/Groups";
 import Departments from "./pages/Departments";
@@ -33,6 +27,7 @@ import Alerts from "./pages/Alerts";
 import Rewards from "./pages/Rewards";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
 
 const queryClient = new QueryClient();
 
@@ -40,178 +35,189 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner />
-      <HashRouter
-        basename="/"
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <BrowserRouter basename="/">
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
+          <ChecklistProvider>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
 
-            <Route
-              path="/admin-dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/admin-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/manager-dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["safety_manager"]}>
-                  <ManagerDashboard />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/manager-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["safety_manager"]}>
+                    <ManagerDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/supervisor-dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["supervisor"]}>
-                  <SupervisorDashboard />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/supervisor-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["supervisor"]}>
+                    <SupervisorDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/employee-dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["employee"]}>
-                  <EmployeeDashboard />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/employee-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["employee"]}>
+                    <EmployeeDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/hazards"
-              element={
-                <ProtectedRoute
-                  allowedRoles={[
-                    "admin",
-                    "safety_manager",
-                    "supervisor",
-                    "employee",
-                  ]}
-                >
-                  <Hazards />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/hazards"
+                element={
+                  <ProtectedRoute
+                    allowedRoles={[
+                      "admin",
+                      "safety_manager",
+                      "supervisor",
+                      "employee",
+                    ]}
+                  >
+                    <Hazards />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/checklists"
-              element={
-                <ProtectedRoute>
-                  <Checklists />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/checklists"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <Checklists />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/notifications"
-              element={
-                <ProtectedRoute>
-                  <Notifications />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/create-list"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CreateList />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/analytics"
-              element={
-                <ProtectedRoute>
-                  <Analytics />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <UserManagement />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <Analytics />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/groups"
-              element={
-                <ProtectedRoute>
-                  <Groups />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <UserManagement />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/departments"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <Departments />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/groups"
+                element={
+                  <ProtectedRoute>
+                    <Groups />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <SystemSettings />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/departments"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <Departments />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/settings/theme"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <SystemTheme />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <SystemSettings />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/training"
-              element={
-                <ProtectedRoute>
-                  <Training />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/settings/theme"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <SystemTheme />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/alerts"
-              element={
-                <ProtectedRoute
-                  allowedRoles={["safety_manager", "supervisor", "employee"]}
-                >
-                  <Alerts />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/training"
+                element={
+                  <ProtectedRoute>
+                    <Training />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/rewards"
-              element={
-                <ProtectedRoute
-                  allowedRoles={["admin", "safety_manager", "employee"]}
-                >
-                  <Rewards />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/alerts"
+                element={
+                  <ProtectedRoute
+                    allowedRoles={["safety_manager", "supervisor", "employee"]}
+                  >
+                    <Alerts />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route
+                path="/rewards"
+                element={
+                  <ProtectedRoute
+                    allowedRoles={["admin", "safety_manager", "employee"]}
+                  >
+                    <Rewards />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ChecklistProvider>
         </AuthProvider>
-      </HashRouter>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
