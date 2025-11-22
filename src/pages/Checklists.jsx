@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Edit, Trash, Eye } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { createChecklistNotification } from "@/lib/notificationUtils";
@@ -32,6 +32,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 const Checklist = () => {
   const { user } = useAuth();
@@ -61,27 +68,23 @@ const Checklist = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [customFieldDialogOpen, setCustomFieldDialogOpen] = useState(false);
+  const [customFieldData, setCustomFieldData] = useState({
+    fieldName: "",
+    fieldValue: "",
+  });
+  const [selectedRowForCustomField, setSelectedRowForCustomField] =
+    useState(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedRowForView, setSelectedRowForView] = useState(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("checklists");
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Filter out empty rows for employees - only show rows with complete data
-      const filteredData = parsed.filter(
-        (row) =>
-          row.location &&
-          row.type &&
-          row.capacity &&
-          row.mfgDate &&
-          row.condition &&
-          row.fireNo &&
-          row.locationCode &&
-          row.remarks
-      );
-      setDataSource(
-        filteredData.map((item, idx) => ({ ...item, key: idx + 1 }))
-      );
-      setCount(filteredData.length);
+      // Removed filtering to keep all checklist rows including incomplete ones to prevent data loss on page reload
+      setDataSource(parsed.map((item, idx) => ({ ...item, key: idx + 1 })));
+      setCount(parsed.length);
     } else {
       // Load dummy data if no stored data exists - this allows employees to view sample data
       setDataSource(
@@ -148,6 +151,7 @@ const Checklist = () => {
       fireNo: "",
       locationCode: "",
       remarks: "",
+      customFields: {},
     };
 
     setDataSource([...dataSource, newChecklist]);
@@ -260,6 +264,7 @@ const Checklist = () => {
       fireNo: formData.mobile,
       locationCode: formData.zone,
       remarks: `${formData.inspectedBy} - ${formData.designation} - ${formData.inchargeName} - ${formData.mailId}`,
+      customFields: {},
     };
 
     setDataSource([...dataSource, newRow]);
@@ -294,6 +299,40 @@ const Checklist = () => {
     setCreateDialogOpen(false);
     setEditMode(false);
     setSelectedRow(null);
+  };
+
+  const handleAddCustomField = () => {
+    if (!selectedRowForCustomField || !customFieldData.fieldName.trim()) {
+      toast.error("Please enter a field name.");
+      return;
+    }
+
+    const newData = dataSource.map((item) => {
+      if (item.key === selectedRowForCustomField.key) {
+        return {
+          ...item,
+          customFields: {
+            ...item.customFields,
+            [customFieldData.fieldName]: customFieldData.fieldValue,
+          },
+        };
+      }
+      return item;
+    });
+
+    setDataSource(newData);
+    handleSave(
+      newData.find((item) => item.key === selectedRowForCustomField.key)
+    );
+    toast.success("Custom field added!");
+    setCustomFieldDialogOpen(false);
+    setCustomFieldData({ fieldName: "", fieldValue: "" });
+    setSelectedRowForCustomField(null);
+  };
+
+  const openCustomFieldDialog = (record) => {
+    setSelectedRowForCustomField(record);
+    setCustomFieldDialogOpen(true);
   };
 
   const columns = [
@@ -331,14 +370,21 @@ const Checklist = () => {
     {
       title: "Condition",
       dataIndex: "condition",
-      width: "10%",
+      width: "8%",
+      editable: true,
+      inputType: "select",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      width: "8%",
       editable: true,
       inputType: "select",
     },
     {
       title: "Fire Extinguisher No",
       dataIndex: "fireNo",
-      width: "14%",
+      width: "12%",
       editable: true,
     },
     {
@@ -350,8 +396,20 @@ const Checklist = () => {
     {
       title: "Remarks",
       dataIndex: "remarks",
-      width: "14%",
+      width: "10%",
       editable: true,
+    },
+    {
+      title: "Custom Fields",
+      dataIndex: "customFields",
+      width: "10%",
+      render: (customFields) => {
+        if (!customFields || Object.keys(customFields).length === 0)
+          return "None";
+        return Object.entries(customFields)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(", ");
+      },
     },
     {
       title: "Operation",
@@ -359,7 +417,7 @@ const Checklist = () => {
       width: "8%",
       render: (_, record) => (
         <div className="flex gap-2">
-          {userPermissions.checklists?.update && (
+          {/* {userPermissions.checklists?.update && (
             <Button
               size="sm"
               onClick={() => {
@@ -380,9 +438,28 @@ const Checklist = () => {
                 setCreateDialogOpen(true);
               }}
             >
-              Edit
+              <Edit className="h-4 w-4" />
+            </Button>
+          )} */}
+          {userPermissions.checklists?.create && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => openCustomFieldDialog(record)}
+            >
+              <Plus className="h-4 w-4" />
             </Button>
           )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setSelectedRowForView(record);
+              setViewDialogOpen(true);
+            }}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
           {userPermissions.checklists?.delete &&
             user?.role !== "Safety Manager" && (
               <Button
@@ -394,7 +471,7 @@ const Checklist = () => {
                   }
                 }}
               >
-                Delete
+                <Trash className="h-4 w-4" />
               </Button>
             )}
         </div>
@@ -405,7 +482,7 @@ const Checklist = () => {
   return (
     <DashboardLayout>
       <div className="p-6 bg-white rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
+        {/* <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Safety Checklists</h2>
           {userPermissions.checklists?.create && (
             <Button
@@ -416,16 +493,16 @@ const Checklist = () => {
               Create List
             </Button>
           )}
-        </div>
+        </div> */}
 
-        {/* <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex justify-end">
           {userPermissions.checklists?.create && user?.role !== "Admin" && (
             <Button onClick={handleAdd} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Add New Row
             </Button>
           )}
-        </div> */}
+        </div>
 
         <Table>
           <TableHeader>
@@ -459,6 +536,14 @@ const Checklist = () => {
                     return (
                       <TableCell key={col.dataIndex}>
                         {col.render(null, record)}
+                      </TableCell>
+                    );
+                  }
+
+                  if (col.dataIndex === "customFields") {
+                    return (
+                      <TableCell key={col.dataIndex}>
+                        {col.render(record.customFields)}
                       </TableCell>
                     );
                   }
@@ -711,6 +796,160 @@ const Checklist = () => {
             >
               {editMode ? "Update Row" : "Add to Row"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={customFieldDialogOpen}
+        onOpenChange={setCustomFieldDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Custom Field</DialogTitle>
+            <DialogDescription>
+              Add a custom field to this checklist row.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="field-name" className="text-right">
+                Field Name
+              </Label>
+              <Input
+                id="field-name"
+                value={customFieldData.fieldName}
+                onChange={(e) =>
+                  setCustomFieldData((prev) => ({
+                    ...prev,
+                    fieldName: e.target.value,
+                  }))
+                }
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="field-value" className="text-right">
+                Field Value
+              </Label>
+              <Input
+                id="field-value"
+                value={customFieldData.fieldValue}
+                onChange={(e) =>
+                  setCustomFieldData((prev) => ({
+                    ...prev,
+                    fieldValue: e.target.value,
+                  }))
+                }
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCustomFieldDialogOpen(false);
+                setCustomFieldData({ fieldName: "", fieldValue: "" });
+                setSelectedRowForCustomField(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleAddCustomField}>Add Field</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Checklist Details</DialogTitle>
+            <DialogDescription>
+              View detailed information for this checklist item.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedRowForView && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <Label>Location:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.location || "N/A"}
+                </p>
+              </div>
+              <div>
+                <Label>Type:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.type || "N/A"}
+                </p>
+              </div>
+              <div>
+                <Label>Capacity:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.capacity || "N/A"}
+                </p>
+              </div>
+              <div>
+                <Label>Date of MFG:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.mfgDate || "N/A"}
+                </p>
+              </div>
+              <div>
+                <Label>Condition:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.condition || "N/A"}
+                </p>
+              </div>
+              <div>
+                <Label>Status:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.status || "N/A"}
+                </p>
+              </div>
+              <div>
+                <Label>Fire Extinguisher No:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.fireNo || "N/A"}
+                </p>
+              </div>
+              <div>
+                <Label>Location Code:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.locationCode || "N/A"}
+                </p>
+              </div>
+              <div className="md:col-span-2">
+                <Label>Remarks:</Label>
+                <p className="text-sm text-gray-600">
+                  {selectedRowForView.remarks || "N/A"}
+                </p>
+              </div>
+              <div className="md:col-span-2">
+                <Label>Custom Fields:</Label>
+                {selectedRowForView.customFields &&
+                Object.keys(selectedRowForView.customFields).length > 0 ? (
+                  <div className="mt-2">
+                    {Object.entries(selectedRowForView.customFields).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          className="flex justify-between py-1 border-b"
+                        >
+                          <span className="font-medium">{key}:</span>
+                          <span>{value}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600">None</p>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,3 +1,9 @@
-- [ ] Remove the "Add New Row" button from the create checklist dialog
-- [ ] Remove the Table component from the create checklist dialog
+# Checklist Operations Icons Update
 
+## Tasks
+
+- [ ] Import Edit, Trash, Eye icons from lucide-react in Checklists.jsx
+- [ ] Replace "Edit" button text with Edit icon
+- [ ] Replace "Add Field" button text with Plus icon
+- [ ] Replace "View" button text with Eye icon
+- [ ] Replace "Delete" button text with Trash icon
