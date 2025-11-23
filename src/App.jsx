@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ChecklistProvider } from "./contexts/ChecklistContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -35,7 +35,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <BrowserRouter basename="/">
+      <HashRouter  basename="/">
         <AuthProvider>
           <ChecklistProvider>
             <Routes>
@@ -217,7 +217,7 @@ const App = () => (
             </Routes>
           </ChecklistProvider>
         </AuthProvider>
-      </BrowserRouter>
+      </HashRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
