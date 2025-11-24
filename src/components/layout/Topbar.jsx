@@ -69,7 +69,7 @@ export const Topbar = () => {
   }, []);
 
   return (
-    <header className="h-12 md:h-16 border-b bg-card flex items-center justify-between px-3 md:px-6">
+    <header className="h-12 md:h-16 border-b bg-card flex items-center justify-between px-3 md:px-6 mb-5">
       <div className="flex items-center gap-3 md:gap-6">
         <Link to="/" className="flex items-center gap-2">
           <ShieldAlert className="h-6 w-6 md:h-8 md:w-8 text-primary" />

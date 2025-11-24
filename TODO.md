@@ -1,17 +1,31 @@
-# TODO: UI Overhaul for ChecklistBuilder.jsx
+# Task: Refactor CreateList Page and Remove Unwanted Checklist Files
 
-## Steps:
+## Steps to Complete:
 
-- [ ] Refactor layout with flexbox/grid for better responsiveness and spacing
-- [ ] Update styling and theming using Tailwind CSS to unify colors, fonts, paddings
-- [ ] Replace text buttons (+, -, delete) with icon buttons, add tooltips for clarity
-- [ ] Add collapsible sections for better UI organization
-- [ ] Improve inline editing with validation feedback when updating cells and titles
-- [ ] Implement drag-and-drop support for reordering sections and rows
-- [ ] Enhance download and submit buttons with more intuitive icons and spacing
-- [ ] Test UI responsiveness, usability and functionality after changes
+1. Rewrite `src/pages/CreateList.jsx`:
+   - Move all code and functionality from `ChecklistBuilder.jsx` into `CreateList.jsx`.
+   - Integrate the header fields UI and logic from `HeaderSection.jsx` directly into `CreateList.jsx`.
+   - Integrate the footer fields UI and logic from `FooterSection.jsx` directly into `CreateList.jsx`.
+   - Keep the existing `DashboardLayout` wrapper in place.
+   - Include all checklist section management, adding/deleting rows, columns, sections, and cell editing.
+   - Include submit checklist functionality and download options.
+   - Remove all import dependencies on the deleted checklist components.
 
-## Notes:
-- Consider using existing UI libraries for icons (e.g., lucide-react or similar)
-- May need to add or update imports in ChecklistBuilder.jsx
-- Follow existing styling conventions (Tailwind CSS) used in project
+2. Delete Unwanted Files:
+   - `src/components/checklist/ChecklistBuilder.jsx`
+   - `src/components/checklist/HeaderSection.jsx`
+   - `src/components/checklist/FooterSection.jsx`
+   - `src/components/checklist/ChecklistTable.jsx`
+   - `src/components/checklist/DeleteButton.jsx`
+
+3. Test the refactored `CreateList.jsx`:
+   - Validate that all checklist builder features work as before.
+   - Confirm add/delete/edit of header/footer fields, sections, rows, and columns.
+   - Confirm submission and download functionality.
+   - Confirm page layout is correct with `DashboardLayout`.
+
+4. Cleanup and finalize.
+
+---
+
+Once completed, provide summary of changes made.
