@@ -3,6 +3,13 @@ import HeaderSection from "./HeaderSection";
 import FooterSection from "./FooterSection";
 import { useChecklist } from "../../contexts/ChecklistContext";
 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
+
 export default function ChecklistBuilder() {
   const [sections, setSections] = useState([]);
   const [sectionCount, setSectionCount] = useState(0);
@@ -170,33 +177,7 @@ export default function ChecklistBuilder() {
 
       <h1 className="text-3xl font-semibold mb-6">Checklist Builder</h1>
 
-      {/* Buttons */}
-      <div className="flex flex-wrap gap-3 mb-5">
-        <button
-          onClick={() => window.print()}
-          className="bg-gray-800 text-white px-4 py-2 rounded"
-        >
-          🖨 Print
-        </button>
-        <button
-          onClick={downloadHTML}
-          className="bg-teal-600 text-white px-4 py-2 rounded"
-        >
-          ⬇ Download HTML
-        </button>
-        <button
-          onClick={downloadJSON}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          ⬇ Download JSON
-        </button>
-        <button
-          onClick={submitChecklist}
-          className="bg-orange-500 text-white px-4 py-2 rounded"
-        >
-          💾 Submit
-        </button>
-      </div>
+      {/* Removed top buttons */}
 
       <hr className="my-6" />
 
@@ -279,6 +260,59 @@ export default function ChecklistBuilder() {
       </button>
 
       <FooterSection />
+
+      {/* Bottom right fixed buttons */}
+      <div className="fixed bottom-4 right-4 flex gap-3 z-50">
+        <button
+          onClick={submitChecklist}
+          className="bg-orange-500 text-white px-4 py-2 rounded shadow"
+          title="Submit Checklist"
+        >
+          💾 Submit
+        </button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded shadow">
+              ⬇ Download
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onClick={() => {
+                // Basic PDF generation using window.print(), can be enhanced with libraries like jsPDF
+                window.print();
+              }}
+            >
+              PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                const data = JSON.stringify(sections, null, 2);
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(
+                  new Blob([data], { type: "application/json" })
+                );
+                a.download = "checklist.json";
+                a.click();
+              }}
+            >
+              JSON
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                const html = document.documentElement.outerHTML;
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+                a.download = "checklist.html";
+                a.click();
+              }}
+            >
+              HTML
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }

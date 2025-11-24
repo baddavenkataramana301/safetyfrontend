@@ -1,5 +1,13 @@
 import React from "react";
 import DeleteButton from "./DeleteButton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 export default function ChecklistTable({
   rows,
@@ -21,59 +29,59 @@ export default function ChecklistTable({
     rows.length > 0 ? rows[0].length - fixedHeaders.length : 0;
 
   return (
-    <table className="w-full border border-gray-300 border-collapse">
-      <thead>
-        <tr className="bg-gray-200">
-          {fixedHeaders.map((header, idx) => (
-            <th
-              key={idx}
-              className="p-2 border border-gray-300 text-left"
-              scope="col"
+    <div className="overflow-x-auto rounded-md border border-gray-300 shadow-sm">
+      <Table className="min-w-full">
+        <TableHeader>
+          <TableRow className="bg-gray-100">
+            {fixedHeaders.map((header, idx) => (
+              <TableHead key={idx} className="text-left px-3 py-2">
+                {header}
+              </TableHead>
+            ))}
+            {Array(dynamicColumnCount)
+              .fill(null)
+              .map((_, idx) => (
+                <TableHead
+                  key={idx + fixedHeaders.length}
+                  className="text-center px-3 py-2 print:hidden"
+                >
+                  Dynamic Col {idx + 1}
+                  <DeleteButton
+                    onClick={() => onDeleteColumn(idx + fixedHeaders.length)}
+                    className="ml-2"
+                    ariaLabel={`Delete dynamic column ${idx + 1}`}
+                  />
+                </TableHead>
+              ))}
+            <TableHead className="print:hidden px-3 py-2">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, rIdx) => (
+            <TableRow
+              key={rIdx}
+              className="bg-white hover:bg-gray-50 transition-colors"
             >
-              {header}
-            </th>
-          ))}
-          {Array(dynamicColumnCount)
-            .fill(null)
-            .map((_, idx) => (
-              <th
-                key={idx + fixedHeaders.length}
-                className="p-2 border border-gray-300 text-center print:hidden"
-                scope="col"
-              >
-                Dynamic Col {idx + 1}
+              {row.map((cell, cIdx) => (
+                <TableCell key={cIdx} className="p-1">
+                  <input
+                    type="text"
+                    value={cell}
+                    onChange={(e) => onCellChange(rIdx, cIdx, e.target.value)}
+                    className="border border-gray-300 rounded p-2 w-full focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </TableCell>
+              ))}
+              <TableCell className="text-center p-1 print:hidden">
                 <DeleteButton
-                  onClick={() => onDeleteColumn(idx + fixedHeaders.length)}
-                  className="ml-2"
-                  ariaLabel={`Delete dynamic column ${idx + 1}`}
+                  onClick={() => onDeleteRow(rIdx)}
+                  ariaLabel={`Delete row ${rIdx + 1}`}
                 />
-              </th>
-            ))}
-          <th className="p-2 border border-gray-300 print:hidden">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, rIdx) => (
-          <tr key={rIdx} className="bg-white">
-            {row.map((cell, cIdx) => (
-              <td key={cIdx} className="border border-gray-300 p-1">
-                <input
-                  type="text"
-                  value={cell}
-                  onChange={(e) => onCellChange(rIdx, cIdx, e.target.value)}
-                  className="border p-2 rounded w-full"
-                />
-              </td>
-            ))}
-            <td className="p-1 border border-gray-300 text-center print:hidden">
-              <DeleteButton
-                onClick={() => onDeleteRow(rIdx)}
-                ariaLabel={`Delete row ${rIdx + 1}`}
-              />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
