@@ -1,7 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { useChecklist } from "../contexts/ChecklistContext";
 import { useChecklist } from "../contexts/ChecklistContext";
 
 // Main Checklists Component
@@ -360,4 +358,3 @@ export default function Checklists() {
     </div>
   );
 }
-

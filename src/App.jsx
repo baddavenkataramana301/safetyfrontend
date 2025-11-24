@@ -35,7 +35,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <HashRouter  basename="/">
+      <HashRouter basename="/">
         <AuthProvider>
           <ChecklistProvider>
             <Routes>
