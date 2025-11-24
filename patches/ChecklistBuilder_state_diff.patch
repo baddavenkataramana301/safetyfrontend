@@ -1,0 +1,30 @@
+<<<<<<< import { useState, useEffect } from "react";
+import HeaderSection from "./HeaderSection";
+import FooterSection from "./FooterSection";
+import { useChecklist } from "../../contexts/ChecklistContext";
+
+=======
+import { useState, useEffect } from "react";
+import HeaderSection from "./HeaderSection";
+import FooterSection from "./FooterSection";
+import { useChecklist } from "../../contexts/ChecklistContext";
+
+>>>>>>> Add separate header/footer states for sections
+<<<<<<< export default function ChecklistBuilder() {
+  const [sections, setSections] = useState([]);
+  const [sectionCount, setSectionCount] = useState(0);
+  const { addChecklist } = useChecklist();
+
+=======
+export default function ChecklistBuilder() {
+  const [sections, setSections] = useState([]);
+  const [sectionCount, setSectionCount] = useState(0);
+  const { addChecklist } = useChecklist();
+
+  // Added new states for header and footer sections
+  const [headerSections, setHeaderSections] = useState([]);
+  const [footerSections, setFooterSections] = useState([]);
+  const [headerSectionCount, setHeaderSectionCount] = useState(0);
+  const [footerSectionCount, setFooterSectionCount] = useState(0);
+
+>>>>>>> Add separate header/footer states for sections

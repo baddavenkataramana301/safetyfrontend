@@ -43,8 +43,13 @@ export default function Checklists() {
   const closeView = () => setViewIndex(null);
 
   const openFill = (index) => {
+    const checklist = checklists[index];
     setFillIndex(index);
-    setFillData(JSON.parse(JSON.stringify(checklists[index])));
+    setFillData({
+      ...JSON.parse(JSON.stringify(checklist)),
+      headerData: checklist.headerData || {},
+      footerData: checklist.footerData || {},
+    });
   };
   const closeFill = () => {
     setFillIndex(null);
@@ -223,6 +228,7 @@ export default function Checklists() {
     return (
       <Modal closeHandler={closeView}>
         <h2 className="text-2xl font-semibold mb-4">{item.name}</h2>
+
         <div className="bg-gray-100 p-4 rounded-lg mb-6 space-y-2">
           <p>
             <strong>Created By:</strong> {item.metadata.createdBy}
@@ -235,6 +241,20 @@ export default function Checklists() {
             <strong>Effective Date:</strong> {item.metadata.effectiveDate}
           </p>
         </div>
+
+        {item.headerFields && item.headerFields.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Header Fields</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-blue-50 p-4 rounded-lg">
+              {item.headerFields.map((field, idx) => (
+                <div key={idx} className="border border-blue-300 rounded p-2 bg-white">
+                  <p className="text-sm font-medium text-gray-700">{field}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {item.sections.map((section, i) => (
           <section key={i} className="mb-6">
             <h3 className="text-xl font-semibold mb-2">Section {i + 1}</h3>
@@ -245,6 +265,45 @@ export default function Checklists() {
             />
           </section>
         ))}
+
+        {item.footerFields && item.footerFields.length > 0 && (() => {
+          // Separate signature fields and non-signature footer fields
+          const signatureFields = item.footerFields.filter(field =>
+            field.toLowerCase().includes("signature")
+          );
+          const otherFooterFields = item.footerFields.filter(field =>
+            !field.toLowerCase().includes("signature")
+          );
+
+          return (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">Footer Fields</h3>
+
+              {signatureFields.length > 0 && (
+                <div className="mb-4 p-4 bg-green-100 rounded border border-green-400">
+                  <h4 className="font-semibold mb-2">Signature(s)</h4>
+                  <div className="flex flex-wrap gap-4">
+                    {signatureFields.map((field, idx) => (
+                      <div key={idx} className="border border-green-500 rounded p-3 bg-white min-w-[120px]">
+                        <p className="text-sm font-medium text-gray-700">{field}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {otherFooterFields.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-green-50 p-4 rounded-lg">
+                  {otherFooterFields.map((field, idx) => (
+                    <div key={idx} className="border border-green-300 rounded p-2 bg-white">
+                      <p className="text-sm font-medium text-gray-700">{field}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </Modal>
     );
   }
