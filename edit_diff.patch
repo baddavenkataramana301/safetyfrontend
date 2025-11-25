@@ -1,0 +1,55 @@
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../components/ui/dropdown-menu";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+import { useChecklist } from "../contexts/ChecklistContext";
+======= 
+import { useState, useEffect } from "react";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../components/ui/dropdown-menu";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+import { useChecklist } from "../contexts/ChecklistContext";
+
+import AddButton from "../components/checklist/AddButton";
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+              <div>
+                <h2 className="text-xl font-semibold mb-4 border-b border-gray-300 pb-2">
+                  Checklist Sections
+                </h2>
+              </div>
+
+              {sections.length === 0 && (
+                <div className="text-center text-sm text-gray-500">
+                  No sections yet. Use the Add Section button to start.
+                </div>
+              )}
+=======
+              <div>
+                <h2 className="text-xl font-semibold mb-4 border-b border-gray-300 pb-2 flex justify-between items-center">
+                  Checklist Sections
+                  <AddButton label="Add Section" onClick={addSection} />
+                </h2>
+              </div>
+
+              {sections.length === 0 && (
+                <div className="text-center text-sm text-gray-500">
+                  No sections yet. Use the Add Section button to start.
+                </div>
+              )}

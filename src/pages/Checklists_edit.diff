@@ -1,0 +1,134 @@
+const [fillIndex, setFillIndex] = React.useState(null);
+  const [fillData, setFillData] = React.useState(null);
+
+=======
+  const [viewIndex, setViewIndex] = React.useState(null);
+  const [fillIndex, setFillIndex] = React.useState(null);
+  const [fillData, setFillData] = React.useState(null);
+
+  // New state for search text
+  const [searchText, setSearchText] = React.useState("");
+>>>>>>> REPLACE
+```
+```
+<<<<<<< SEARCH
+  // Save as a new version
+  const saveAsNew = () => {
+    if (fillIndex === null) return;
+    const newItem = JSON.parse(JSON.stringify(fillData));
+    newItem.name = newItem.name + " (Updated)";
+    newItem.approved = false;
+    setChecklists((prev) => [...prev, newItem]);
+    closeFill();
+    alert("New version created!");
+  };
+
+=======
+  // Save as a new version
+  const saveAsNew = () => {
+    if (fillIndex === null) return;
+    const newItem = JSON.parse(JSON.stringify(fillData));
+    newItem.name = newItem.name + " (Updated)";
+    newItem.approved = false;
+    setChecklists((prev) => [...prev, newItem]);
+    closeFill();
+    alert("New version created!");
+  };
+
+  // Filtered checklists based on searchText
+  const filteredChecklists = checklists.filter((item) => {
+    const lowerSearch = searchText.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(lowerSearch) ||
+      (item.metadata.createdBy &&
+        item.metadata.createdBy.toLowerCase().includes(lowerSearch))
+    );
+  });
+>>>>>>> REPLACE
+```
+```
+<<<<<<< SEARCH
+      <div className="mb-6 text-gray-700">
+        Preview, fill, approve and manage your checklists.
+      </div>
+  
+      <div className="overflow-x-auto rounded shadow border border-gray-300">
+        <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
+          <thead>
+            <tr className="bg-gray-200 sticky top-0">
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Document Name
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Created By
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Approved By
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Effective Date
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Status
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {checklists.map((item, index) => (
+              <ChecklistRow key={index} item={item} index={index} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+=======
+      <div className="mb-6 text-gray-700">
+        Preview, fill, approve and manage your checklists.
+      </div>
+
+      <div className="mb-4">
+        <Label htmlFor="search-input" className="font-semibold mb-1 block">
+          Search Checklists
+        </Label>
+        <Input
+          id="search-input"
+          type="text"
+          placeholder="Search by document name or created by..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+      </div>
+  
+      <div className="overflow-x-auto rounded shadow border border-gray-300">
+        <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
+          <thead>
+            <tr className="bg-gray-200 sticky top-0">
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Document Name
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Created By
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Approved By
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Effective Date
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Status
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredChecklists.map((item, index) => (
+              <ChecklistRow key={index} item={item} index={index} />
+            ))}
+          </tbody>
+        </table>
+      </div>

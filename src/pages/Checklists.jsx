@@ -1,6 +1,7 @@
-import React from "react";
+ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useChecklist } from "../contexts/ChecklistContext";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   Table,
   TableBody,
@@ -10,6 +11,7 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { Button } from "../components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +39,9 @@ export default function Checklists() {
   const [viewIndex, setViewIndex] = React.useState(null);
   const [fillIndex, setFillIndex] = React.useState(null);
   const [fillData, setFillData] = React.useState(null);
+
+  // New state for search text
+  const [searchText, setSearchText] = React.useState("");
 
   // Handlers for modals
   const openView = (index) => setViewIndex(index);
@@ -96,6 +101,16 @@ export default function Checklists() {
     closeFill();
     alert("New version created!");
   };
+
+  // Filtered checklists based on searchText
+  const filteredChecklists = checklists.filter((item) => {
+    const lowerSearch = searchText.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(lowerSearch) ||
+      (item.metadata.createdBy &&
+        item.metadata.createdBy.toLowerCase().includes(lowerSearch))
+    );
+  });
 
   // Approve checklist
   const approveItem = (index) => {
@@ -397,6 +412,19 @@ export default function Checklists() {
           Preview, fill, approve and manage your checklists.
         </p>
 
+        <div className="mb-4">
+          <Label htmlFor="search-input" className="font-semibold mb-1 block">
+            Search Checklists
+          </Label>
+          <Input
+            id="search-input"
+            type="text"
+            placeholder="Search by document name or created by..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </div>
+
         <div className="overflow-x-auto rounded shadow border border-gray-300">
           <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
             <thead>
@@ -422,7 +450,7 @@ export default function Checklists() {
               </tr>
             </thead>
             <tbody>
-              {checklists.map((item, index) => (
+              {filteredChecklists.map((item, index) => (
                 <ChecklistRow key={index} item={item} index={index} />
               ))}
             </tbody>
