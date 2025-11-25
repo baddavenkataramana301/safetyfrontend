@@ -317,131 +317,135 @@ export default function CreateList() {
           <CardContent>
             <div className="space-y-8">
               <div>
-                <h2 className="text-xl font-semibold mb-4 border-b border-gray-300 pb-2 flex justify-between items-center">
-                  Checklist Sections
-                  <AddButton label="Add Section" onClick={addSection} />
-                </h2>
-              </div>
-
-              {sections.length === 0 && (
-                <div className="text-center text-sm text-gray-500">
-                  No sections yet. Use the Add Section button to start.
-                </div>
-              )}
-
-              {sections.map((sec) => (
-                <Card
-                  key={sec.id}
-                  className="mb-6 shadow-md border border-gray-200 rounded-lg"
-                >
-                  <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                      <span className="font-semibold text-lg whitespace-nowrap">
-                        Section
-                      </span>
-                      <Input
-                        value={sec.title}
-                        onChange={(e) => {
-                          const title = e.target.value;
-                          setSections((prev) =>
-                            prev.map((s) =>
-                              s.id === sec.id ? { ...s, title } : s
-                            )
-                          );
-                        }}
-                        className="w-full sm:w-80"
-                        placeholder={`Section ${sec.id} title`}
-                      />
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center justify-center gap-1"
-                        title="Add Column"
-                        onClick={() => addColumn(sec.id)}
-                      >
-                        <span className="text-xl font-bold">+</span> Column
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="flex items-center justify-center gap-1"
-                        title="Add Row"
-                        onClick={() => addRow(sec.id)}
-                      >
-                        <span className="text-xl font-bold">+</span> Row
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="flex items-center justify-center gap-1"
-                        title="Delete Row"
-                        onClick={() => deleteRow(sec.id)}
-                      >
-                        <span className="font-bold">−</span> Row
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex items-center justify-center gap-1"
-                        title="Delete Section"
-                        onClick={() => deleteSection(sec.id)}
-                      >
-                        🗑 Delete
-                      </Button>
-                    </div>
-                  </CardHeader>
-
+                <Card className="mb-6 print:bg-white">
                   <CardContent>
-                    <div className="overflow-x-auto">
-                      <table className="w-full table-fixed border-collapse border border-gray-300 rounded-md">
-                        <thead>
-                          <tr className="bg-gray-200">
-                            {sec.columns.map((col, idx) => (
-                              <th
-                                key={idx}
-                                className="border border-gray-300 px-4 py-2 text-left font-semibold text-gray-700"
-                              >
-                                {col}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sec.rows.map((row, rIdx) => (
-                            <tr
-                              key={rIdx}
-                              className="odd:bg-white even:bg-gray-50"
-                            >
-                              {row.map((col, cIdx) => (
-                                <td
-                                  key={cIdx}
-                                  className="border border-gray-300 p-2"
-                                >
-                                  <Input
-                                    value={col}
-                                    onChange={(e) =>
-                                      updateCell(
-                                        sec.id,
-                                        rIdx,
-                                        cIdx,
-                                        e.target.value
-                                      )
-                                    }
-                                    className="p-1"
-                                  />
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="flex justify-between items-center mb-6 print:hidden">
+                      <h3 className="text-xl font-semibold">Checklist Sections</h3>
+                      <AddButton label="Add Section" onClick={addSection} />
                     </div>
+
+                    {sections.length === 0 ? (
+                      <div className="text-center text-sm text-gray-500 py-8">
+                        <p className="mb-2">No sections yet. Use the Add Section button to start.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {sections.map((sec) => (
+                          <Card
+                            key={sec.id}
+                            className="rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                          >
+                            <CardHeader className="pb-4 border-b border-gray-100">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                  <span className="font-semibold text-sm text-gray-600 whitespace-nowrap">
+                                    Section Title:
+                                  </span>
+                                  <Input
+                                    value={sec.title}
+                                    onChange={(e) => {
+                                      const title = e.target.value;
+                                      setSections((prev) =>
+                                        prev.map((s) =>
+                                          s.id === sec.id ? { ...s, title } : s
+                                        )
+                                      );
+                                    }}
+                                    className="w-full sm:w-64 h-8 text-sm"
+                                    placeholder={`Section ${sec.id} title`}
+                                  />
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-1">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex items-center gap-1 text-xs h-8"
+                                    title="Add Column"
+                                    onClick={() => addColumn(sec.id)}
+                                  >
+                                    <span className="text-sm font-bold">+</span> Column
+                                  </Button>
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="flex items-center gap-1 text-xs h-8"
+                                    title="Add Row"
+                                    onClick={() => addRow(sec.id)}
+                                  >
+                                    <span className="text-sm font-bold">+</span> Row
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="flex items-center gap-1 text-xs h-8"
+                                    title="Delete Row"
+                                    onClick={() => deleteRow(sec.id)}
+                                  >
+                                    <span className="font-bold">−</span> Row
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="flex items-center gap-1 text-xs h-8"
+                                    title="Delete Section"
+                                    onClick={() => deleteSection(sec.id)}
+                                  >
+                                    🗑 Delete
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardHeader>
+
+                            <CardContent className="pt-4">
+                              {sec.rows.length === 0 ? (
+                                <div className="text-center text-sm text-gray-400 py-6">
+                                  No rows added yet. Click "+ Row" to add data.
+                                </div>
+                              ) : (
+                                <div className="space-y-3">
+                                  {sec.rows.map((row, rIdx) => (
+                                    <div
+                                      key={rIdx}
+                                      className="bg-gray-50 rounded-md p-3 border border-gray-100 hover:bg-gray-100 transition-colors"
+                                    >
+                                      <div className="space-y-2">
+                                        {row.map((col, cIdx) => (
+                                          <div
+                                            key={cIdx}
+                                            className="flex flex-col sm:flex-row sm:items-center gap-2"
+                                          >
+                                            <label className="font-semibold text-gray-700 text-xs w-full sm:w-40 whitespace-nowrap">
+                                              {sec.columns[cIdx]}:
+                                            </label>
+                                            <Input
+                                              value={col}
+                                              onChange={(e) =>
+                                                updateCell(
+                                                  sec.id,
+                                                  rIdx,
+                                                  cIdx,
+                                                  e.target.value
+                                                )
+                                              }
+                                              className="p-2 w-full flex-1 text-sm h-8"
+                                              placeholder={`Enter ${sec.columns[cIdx]}`}
+                                            />
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
-              ))}
+              </div>
 
               <div>
                 <Card className="mb-6 print:bg-white">
@@ -508,35 +512,39 @@ export default function CreateList() {
                 </Card>
               </div>
 
-              {/* Submit and Download buttons */}
-              <div className="fixed bottom-8 right-3 flex gap-3  z-50">
-                <Button
-                  variant="secondary"
-                  onClick={submitChecklist}
-                  title="Submit Checklist"
-                  className="flex items-center gap-1"
-                >
-                  💾 Submit
-                </Button>
+              {/* Submit and Download buttons (moved to top-right for better visibility) */}
+              <div className="fixed top-20 right-8 z-50 print:hidden">
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 bg-white shadow-md rounded-md p-2 ring-1 ring-gray-200">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={submitChecklist}
+                    title="Submit Checklist"
+                    aria-label="Submit checklist"
+                    className="flex items-center gap-1"
+                  >
+                    💾 Submit
+                  </Button>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="flex items-center gap-1">
-                      ⬇ Download
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => window.print()}>
-                      PDF
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={downloadJSON}>
-                      JSON
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={downloadHTML}>
-                      HTML
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" className="flex items-center gap-1">
+                        ⬇ Download
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => window.print()}>
+                        PDF
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={downloadJSON}>
+                        JSON
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={downloadHTML}>
+                        HTML
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             </div>
           </CardContent>

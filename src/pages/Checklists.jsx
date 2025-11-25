@@ -13,6 +13,14 @@ import {
 import { Button } from "../components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -84,9 +92,8 @@ export default function Checklists() {
   // Save updated checklist
   const saveFilled = () => {
     if (fillIndex === null) return;
-    const newChecklists = [...checklists];
-    newChecklists[fillIndex] = fillData;
-    setChecklists(newChecklists);
+    // use context updateChecklist to persist changes
+    updateChecklist(fillIndex, fillData);
     closeFill();
     alert("Checklist updated successfully!");
   };
@@ -97,7 +104,7 @@ export default function Checklists() {
     const newItem = JSON.parse(JSON.stringify(fillData));
     newItem.name = newItem.name + " (Updated)";
     newItem.approved = false;
-    setChecklists((prev) => [...prev, newItem]);
+    addChecklist(newItem);
     closeFill();
     alert("New version created!");
   };
@@ -114,18 +121,14 @@ export default function Checklists() {
 
   // Approve checklist
   const approveItem = (index) => {
-    const newChecklists = [...checklists];
-    newChecklists[index].approved = true;
-    newChecklists[index].metadata.approvedBy = "Approved Internally ✔";
-    setChecklists(newChecklists);
+    // use context approveChecklist for consistency
+    approveChecklist(index);
   };
 
   // Delete checklist after confirmation
   const deleteItem = (index) => {
     if (!window.confirm("Delete this checklist?")) return;
-    const newChecklists = [...checklists];
-    newChecklists.splice(index, 1);
-    setChecklists(newChecklists);
+    deleteChecklist(index);
   };
 
   // Internal reusable component: ChecklistRow for main list
@@ -396,67 +399,109 @@ export default function Checklists() {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold">
-            Checklist Document Manager – POC
-          </h1>
-          <button
-            onClick={() => navigate("/create-list")}
-            className="bg-blue-700 hover:bg-blue-800 text-white text-sm rounded px-3 py-1"
-          >
-            Create List
-          </button>
-        </div>
-        <p className="mb-6 text-gray-700">
-          Preview, fill, approve and manage your checklists.
-        </p>
+      <Card className="max-w-6xl mx-auto">
+        <CardHeader>
+          <div className="flex justify-between items-center w-full">
+            <div>
+              <CardTitle>Checklist Document Manager – POC</CardTitle>
+              <CardDescription>Preview, fill, approve and manage your checklists.</CardDescription>
+            </div>
+            <div>
+              <Button
+                onClick={() => navigate("/create-list")}
+                className="bg-blue-700 hover:bg-blue-800 text-white text-sm rounded px-3 py-1"
+              >
+                Create List
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
 
-        <div className="mb-4">
-          <Label htmlFor="search-input" className="font-semibold mb-1 block">
-            Search Checklists
-          </Label>
-          <Input
-            id="search-input"
-            type="text"
-            placeholder="Search by document name or created by..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-        </div>
+        <CardContent>
+          <div className="mb-4">
+            <Label htmlFor="search-input" className="font-semibold mb-1 block">
+              Search Checklists
+            </Label>
+            <Input
+              id="search-input"
+              type="text"
+              placeholder="Search by document name or created by..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
 
-        <div className="overflow-x-auto rounded shadow border border-gray-300">
-          <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
-            <thead>
-              <tr className="bg-gray-200 sticky top-0">
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Document Name
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Created By
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Approved By
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Effective Date
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Status
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredChecklists.map((item, index) => (
-                <ChecklistRow key={index} item={item} index={index} />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          <Tabs defaultValue="approved" className="w-full">
+            {/* Tabs: Approved/Pending views for checklist documents. Search applies across both tabs. */}
+            <TabsList className="grid w-full max-w-md grid-cols-2 items-center">
+              <TabsTrigger value="approved">Approved</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="approved" className="space-y-6">
+              <div className="overflow-x-auto rounded shadow border border-gray-300">
+                <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
+                  <thead>
+                    <tr className="bg-gray-200 sticky top-0">
+                      <th className="border border-gray-300 px-4 py-2 text-left">Document Name</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Created By</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Approved By</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Effective Date</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredChecklists
+                      .filter((item) => item.approved)
+                      .map((item) => {
+                        const originalIndex = checklists.findIndex((c) => c === item);
+                        return (
+                          <ChecklistRow
+                            key={originalIndex}
+                            item={item}
+                            index={originalIndex}
+                          />
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="pending" className="space-y-6">
+              <div className="overflow-x-auto rounded shadow border border-gray-300">
+                <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
+                  <thead>
+                    <tr className="bg-gray-200 sticky top-0">
+                      <th className="border border-gray-300 px-4 py-2 text-left">Document Name</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Created By</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Approved By</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Effective Date</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredChecklists
+                      .filter((item) => !item.approved)
+                      .map((item) => {
+                        const originalIndex = checklists.findIndex((c) => c === item);
+                        return (
+                          <ChecklistRow
+                            key={originalIndex}
+                            item={item}
+                            index={originalIndex}
+                          />
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
       <ViewModal />
       <FillModal />
