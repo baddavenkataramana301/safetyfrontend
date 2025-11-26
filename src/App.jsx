@@ -15,6 +15,8 @@ import EmployeeDashboard from "./pages/EmployeeDashboard";
 import Hazards from "./pages/Hazards";
 import Checklists from "./pages/Checklists";
 import CreateList from "./pages/CreateList";
+import ListSet from "./pages/ListSet";
+import ChecklistPage from "./pages/ChecklistPage";
 import Notifications from "./pages/Notifications";
 import Analytics from "./pages/Analytics";
 import UserManagement from "./pages/UserManagement";
@@ -102,12 +104,11 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
-                      <Checklists />
+                      <ChecklistPage />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/create-list"
                 element={
@@ -127,7 +128,16 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-
+              <Route
+                path="/list-set"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <ListSet />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/analytics"
                 element={

@@ -320,13 +320,17 @@ export default function CreateList() {
                 <Card className="mb-6 print:bg-white">
                   <CardContent>
                     <div className="flex justify-between items-center mb-6 print:hidden">
-                      <h3 className="text-xl font-semibold">Checklist Sections</h3>
+                      <h3 className="text-xl font-semibold">
+                        Checklist Sections
+                      </h3>
                       <AddButton label="Add Section" onClick={addSection} />
                     </div>
 
                     {sections.length === 0 ? (
                       <div className="text-center text-sm text-gray-500 py-8">
-                        <p className="mb-2">No sections yet. Use the Add Section button to start.</p>
+                        <p className="mb-2">
+                          No sections yet. Use the Add Section button to start.
+                        </p>
                       </div>
                     ) : (
                       <div className="space-y-6">
@@ -364,7 +368,8 @@ export default function CreateList() {
                                     title="Add Column"
                                     onClick={() => addColumn(sec.id)}
                                   >
-                                    <span className="text-sm font-bold">+</span> Column
+                                    <span className="text-sm font-bold">+</span>{" "}
+                                    Column
                                   </Button>
                                   <Button
                                     variant="secondary"
@@ -373,7 +378,8 @@ export default function CreateList() {
                                     title="Add Row"
                                     onClick={() => addRow(sec.id)}
                                   >
-                                    <span className="text-sm font-bold">+</span> Row
+                                    <span className="text-sm font-bold">+</span>{" "}
+                                    Row
                                   </Button>
                                   <Button
                                     variant="destructive"
@@ -511,43 +517,42 @@ export default function CreateList() {
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Submit and Download buttons (moved to top-right for better visibility) */}
-              <div className="fixed top-20 right-8 z-50 print:hidden">
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 bg-white shadow-md rounded-md p-2 ring-1 ring-gray-200">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={submitChecklist}
-                    title="Submit Checklist"
-                    aria-label="Submit checklist"
-                    className="flex items-center gap-1"
-                  >
-                    💾 Submit
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="sm" className="flex items-center gap-1">
-                        ⬇ Download
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => window.print()}>
-                        PDF
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={downloadJSON}>
-                        JSON
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={downloadHTML}>
-                        HTML
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
             </div>
           </CardContent>
+          {/* Submit and Download buttons (adjusted to fix scroll float issue) */}
+          <div className="z-50 print:hidden fixed bottom-4 right-4 overflow-visible">
+            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 bg-white shadow-md rounded-md p-2 ring-1 ring-gray-200">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={submitChecklist}
+                title="Submit Checklist"
+                aria-label="Submit checklist"
+                className="flex items-center gap-1"
+              >
+                Submit
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" className="flex items-center gap-1">
+                    Download
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => window.print()}>
+                    PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={downloadJSON}>
+                    JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={downloadHTML}>
+                    HTML
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </Card>
       </div>
     </>

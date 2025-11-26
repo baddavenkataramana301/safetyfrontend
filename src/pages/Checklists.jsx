@@ -1,4 +1,4 @@
- import React from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useChecklist } from "../contexts/ChecklistContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -134,7 +134,7 @@ export default function Checklists() {
   // Internal reusable component: ChecklistRow for main list
   function ChecklistRow({ item, index }) {
     return (
-      <tr className="even:bg-gray-50">
+      <tr className="">
         <td className="border border-gray-300 px-4 py-2">{item.name}</td>
         <td className="border border-gray-300 px-4 py-2">
           {item.metadata.createdBy}
@@ -149,30 +149,30 @@ export default function Checklists() {
           {item.approved ? "Approved" : "Pending"}
         </td>
         <td className="border border-gray-300 px-4 py-2 space-x-2">
-          <button
+          <Button
             onClick={() => openView(index)}
             className="bg-blue-700 hover:bg-blue-800 text-white text-sm rounded px-3 py-1"
           >
             View
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => openFill(index)}
             className="bg-teal-600 hover:bg-teal-700 text-white text-sm rounded px-3 py-1"
           >
             Fill
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => approveItem(index)}
             className="bg-green-600 hover:bg-green-700 text-white text-sm rounded px-3 py-1"
           >
             Approve
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => deleteItem(index)}
             className="bg-red-600 hover:bg-red-700 text-white text-sm rounded px-3 py-1"
           >
             Delete
-          </button>
+          </Button>
         </td>
       </tr>
     );
@@ -265,7 +265,10 @@ export default function Checklists() {
             <h3 className="text-lg font-semibold mb-3">Header Fields</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-blue-50 p-4 rounded-lg">
               {item.headerFields.map((field, idx) => (
-                <div key={idx} className="border border-blue-300 rounded p-2 bg-white">
+                <div
+                  key={idx}
+                  className="border border-blue-300 rounded p-2 bg-white"
+                >
                   <p className="text-sm font-medium text-gray-700">{field}</p>
                 </div>
               ))}
@@ -284,44 +287,56 @@ export default function Checklists() {
           </section>
         ))}
 
-        {item.footerFields && item.footerFields.length > 0 && (() => {
-          // Separate signature fields and non-signature footer fields
-          const signatureFields = item.footerFields.filter(field =>
-            field.toLowerCase().includes("signature")
-          );
-          const otherFooterFields = item.footerFields.filter(field =>
-            !field.toLowerCase().includes("signature")
-          );
+        {item.footerFields &&
+          item.footerFields.length > 0 &&
+          (() => {
+            // Separate signature fields and non-signature footer fields
+            const signatureFields = item.footerFields.filter((field) =>
+              field.toLowerCase().includes("signature")
+            );
+            const otherFooterFields = item.footerFields.filter(
+              (field) => !field.toLowerCase().includes("signature")
+            );
 
-          return (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-3">Footer Fields</h3>
+            return (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-3">Footer Fields</h3>
 
-              {signatureFields.length > 0 && (
-                <div className="mb-4 p-4 bg-green-100 rounded border border-green-400">
-                  <h4 className="font-semibold mb-2">Signature(s)</h4>
-                  <div className="flex flex-wrap gap-4">
-                    {signatureFields.map((field, idx) => (
-                      <div key={idx} className="border border-green-500 rounded p-3 bg-white min-w-[120px]">
-                        <p className="text-sm font-medium text-gray-700">{field}</p>
+                {signatureFields.length > 0 && (
+                  <div className="mb-4 p-4 bg-green-100 rounded border border-green-400">
+                    <h4 className="font-semibold mb-2">Signature(s)</h4>
+                    <div className="flex flex-wrap gap-4">
+                      {signatureFields.map((field, idx) => (
+                        <div
+                          key={idx}
+                          className="border border-green-500 rounded p-3 bg-white min-w-[120px]"
+                        >
+                          <p className="text-sm font-medium text-gray-700">
+                            {field}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {otherFooterFields.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-green-50 p-4 rounded-lg">
+                    {otherFooterFields.map((field, idx) => (
+                      <div
+                        key={idx}
+                        className="border border-green-300 rounded p-2 bg-white"
+                      >
+                        <p className="text-sm font-medium text-gray-700">
+                          {field}
+                        </p>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {otherFooterFields.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-green-50 p-4 rounded-lg">
-                  {otherFooterFields.map((field, idx) => (
-                    <div key={idx} className="border border-green-300 rounded p-2 bg-white">
-                      <p className="text-sm font-medium text-gray-700">{field}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })()}
+                )}
+              </div>
+            );
+          })()}
       </Modal>
     );
   }
@@ -404,7 +419,9 @@ export default function Checklists() {
           <div className="flex justify-between items-center w-full">
             <div>
               <CardTitle>Checklist Document Manager – POC</CardTitle>
-              <CardDescription>Preview, fill, approve and manage your checklists.</CardDescription>
+              <CardDescription>
+                Preview, fill, approve and manage your checklists.
+              </CardDescription>
             </div>
             <div>
               <Button
@@ -443,19 +460,33 @@ export default function Checklists() {
                 <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
                   <thead>
                     <tr className="bg-gray-200 sticky top-0">
-                      <th className="border border-gray-300 px-4 py-2 text-left">Document Name</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Created By</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Approved By</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Effective Date</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Document Name
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Created By
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Approved By
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Effective Date
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Status
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredChecklists
                       .filter((item) => item.approved)
                       .map((item) => {
-                        const originalIndex = checklists.findIndex((c) => c === item);
+                        const originalIndex = checklists.findIndex(
+                          (c) => c === item
+                        );
                         return (
                           <ChecklistRow
                             key={originalIndex}
@@ -474,19 +505,33 @@ export default function Checklists() {
                 <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
                   <thead>
                     <tr className="bg-gray-200 sticky top-0">
-                      <th className="border border-gray-300 px-4 py-2 text-left">Document Name</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Created By</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Approved By</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Effective Date</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Document Name
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Created By
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Approved By
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Effective Date
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Status
+                      </th>
+                      <th className="border border-gray-300 px-4 py-2 text-left">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredChecklists
                       .filter((item) => !item.approved)
                       .map((item) => {
-                        const originalIndex = checklists.findIndex((c) => c === item);
+                        const originalIndex = checklists.findIndex(
+                          (c) => c === item
+                        );
                         return (
                           <ChecklistRow
                             key={originalIndex}
