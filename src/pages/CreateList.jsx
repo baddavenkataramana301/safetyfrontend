@@ -35,6 +35,19 @@ export default function CreateList() {
   const [sections, setSections] = useState([]);
   const [sectionCount, setSectionCount] = useState(0);
 
+  const isSlNoColumnName = (name = "") => name.trim().toLowerCase() === "sl no";
+
+  const renumberSectionRows = (section) => {
+    const slIndex = section.columns.findIndex((col) => isSlNoColumnName(col));
+    if (slIndex === -1) return section;
+    const rows = section.rows.map((row, rowIdx) => {
+      const updatedRow = [...row];
+      updatedRow[slIndex] = String(rowIdx + 1);
+      return updatedRow;
+    });
+    return { ...section, rows };
+  };
+
   const [headerFields, setHeaderFields] = useState([
     "Name",
     "Designation",
@@ -133,21 +146,13 @@ export default function CreateList() {
   /* Section management */
   const addSection = () => {
     const newId = sectionCount + 1;
-    setSections((prev) => [
-      ...prev,
-      {
-        id: newId,
-        title: `Section ${newId}`,
-        columns: [
-          "Sl No",
-          "Point to Check",
-          "Status",
-          "Action Required",
-          "Remarks",
-        ],
-        rows: [["", "", "", "", ""]],
-      },
-    ]);
+    const baseSection = {
+      id: newId,
+      title: `Section ${newId}`,
+      columns: ["Sl No", "Point to Check", "Status", "Action Required", "Remarks"],
+      rows: [["", "", "", "", ""]],
+    };
+    setSections((prev) => [...prev, renumberSectionRows(baseSection)]);
     setSectionCount(newId);
   };
   const deleteSection = (id) => {
@@ -157,7 +162,10 @@ export default function CreateList() {
     setSections((prev) =>
       prev.map((sec) =>
         sec.id === id
-          ? { ...sec, rows: [...sec.rows, Array(sec.columns.length).fill("")] }
+          ? renumberSectionRows({
+              ...sec,
+              rows: [...sec.rows, Array(sec.columns.length).fill("")],
+            })
           : sec
       )
     );
@@ -166,10 +174,10 @@ export default function CreateList() {
     setSections((prev) =>
       prev.map((sec) =>
         sec.id === id
-          ? {
+          ? renumberSectionRows({
               ...sec,
               rows: sec.rows.slice(0, Math.max(0, sec.rows.length - 1)),
-            }
+            })
           : sec
       )
     );
@@ -180,11 +188,11 @@ export default function CreateList() {
     setSections((prev) =>
       prev.map((sec) =>
         sec.id === id
-          ? {
+          ? renumberSectionRows({
               ...sec,
               columns: [...sec.columns, name],
               rows: sec.rows.map((r) => [...r, ""]),
-            }
+            })
           : sec
       )
     );
@@ -194,14 +202,16 @@ export default function CreateList() {
     setSections((prev) =>
       prev.map((sec) =>
         sec.id === secId
-          ? {
-              ...sec,
-              rows: sec.rows.map((row, rIdx) =>
-                rIdx === rowIndex
-                  ? row.map((col, cIdx) => (cIdx === colIndex ? value : col))
-                  : row
-              ),
-            }
+          ? isSlNoColumnName(sec.columns[colIndex])
+            ? sec
+            : renumberSectionRows({
+                ...sec,
+                rows: sec.rows.map((row, rIdx) =>
+                  rIdx === rowIndex
+                    ? row.map((col, cIdx) => (cIdx === colIndex ? value : col))
+                    : row
+                ),
+              })
           : sec
       )
     );
@@ -212,12 +222,12 @@ export default function CreateList() {
     setSections((prev) =>
       prev.map((sec) =>
         sec.id === secId
-          ? {
+          ? renumberSectionRows({
               ...sec,
               columns: sec.columns.map((col, idx) =>
                 idx === colIndex ? newName : col
               ),
-            }
+            })
           : sec
       )
     );
@@ -389,8 +399,8 @@ export default function CreateList() {
 
   return (
     <>
-      <div className="max-w-7xl w-full  overflow-y-auto h-full">
-        <Card className="p-4">
+      <div >
+       
           <CardHeader>
             <div className="">
               <CardTitle className="text-3xl font-bold items-center flex gap-2 mb-4 justify-center">
@@ -801,7 +811,16 @@ export default function CreateList() {
                                                       className="border border-gray-300 p-2"
                                                     >
                                                       <Input
-                                                        value={col}
+                                                        value={
+                                                          isSlNoColumnName(
+                                                            sec.columns[cIdx]
+                                                          )
+                                                            ? String(rIdx + 1)
+                                                            : col
+                                                        }
+                                                        disabled={isSlNoColumnName(
+                                                          sec.columns[cIdx]
+                                                        )}
                                                         onChange={(e) =>
                                                           updateCell(
                                                             sec.id,
@@ -934,7 +953,16 @@ export default function CreateList() {
                                               className="border border-gray-300 p-2"
                                             >
                                               <Input
-                                                value={col}
+                                                value={
+                                                  isSlNoColumnName(
+                                                    sec.columns[cIdx]
+                                                  )
+                                                    ? String(rIdx + 1)
+                                                    : col
+                                                }
+                                                disabled={isSlNoColumnName(
+                                                  sec.columns[cIdx]
+                                                )}
                                                 onChange={(e) =>
                                                   updateCell(
                                                     sec.id,
@@ -1226,7 +1254,7 @@ export default function CreateList() {
               </DropdownMenu>
             </div>
           </div>
-        </Card>
+      
       </div>
     </>
   );
