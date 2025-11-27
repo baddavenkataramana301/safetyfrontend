@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useChecklist } from "../contexts/ChecklistContext";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   Table,
   TableBody,
@@ -29,6 +28,54 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import ChecklistBuilderForm from "@/components/checklist/ChecklistBuilderForm";
+
+const DEFAULT_COLUMNS = [
+  "Sl No",
+  "Point to Check",
+  "Status",
+  "Action Required",
+  "Remarks",
+];
+
+const padRow = (row, targetLength) => {
+  const next = [...row];
+  while (next.length < targetLength) {
+    next.push("");
+  }
+  return next.slice(0, targetLength);
+};
+
+const ensureSectionShape = (section, index) => {
+  const columns =
+    section.columns && section.columns.length
+      ? [...section.columns]
+      : Array.from(
+          { length: section.rows?.[0]?.length || DEFAULT_COLUMNS.length },
+          (_, idx) => DEFAULT_COLUMNS[idx] || `Column ${idx + 1}`
+        );
+
+  const rows = (section.rows || []).map((row) => padRow(row, columns.length));
+
+  return {
+    id: section.id ?? index + 1,
+    title: section.title || `Section ${index + 1}`,
+    columns,
+    rows,
+  };
+};
+
+const prepareBuilderInitialData = (checklist) => ({
+  headerFields: checklist.headerFields || [],
+  headerData: checklist.headerData || {},
+  footerFields: checklist.footerFields || [],
+  footerData: checklist.footerData || {},
+  sections: checklist.sections
+    ? checklist.sections.map((section, index) =>
+        ensureSectionShape(section, index)
+      )
+    : [],
+});
 
 // Main Checklists Component
 export default function Checklists() {
@@ -48,7 +95,9 @@ export default function Checklists() {
   const [fillIndex, setFillIndex] = React.useState(null);
   const [fillData, setFillData] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
-  const [editData, setEditData] = React.useState(null);
+  const [editMeta, setEditMeta] = React.useState(null);
+  const [editBuilderInitial, setEditBuilderInitial] = React.useState(null);
+  const [editBuilderKey, setEditBuilderKey] = React.useState(0);
 
   // New state for search text
   const [searchText, setSearchText] = React.useState("");
@@ -60,15 +109,21 @@ export default function Checklists() {
   const openEdit = (index) => {
     const checklist = checklists[index];
     setEditIndex(index);
-    setEditData({
-      ...JSON.parse(JSON.stringify(checklist)),
-      headerFields: checklist.headerFields || [],
-      footerFields: checklist.footerFields || [],
+    setEditMeta({
+      name: checklist.name || "",
+      metadata: {
+        createdBy: checklist.metadata?.createdBy || "",
+        approvedBy: checklist.metadata?.approvedBy || "",
+        effectiveDate: checklist.metadata?.effectiveDate || "",
+      },
     });
+    setEditBuilderInitial(prepareBuilderInitialData(checklist));
+    setEditBuilderKey(Date.now());
   };
   const closeEdit = () => {
     setEditIndex(null);
-    setEditData(null);
+    setEditMeta(null);
+    setEditBuilderInitial(null);
   };
 
   const openFill = (index) => {
@@ -103,6 +158,26 @@ export default function Checklists() {
       newSections[sectionIndex].rows[rowIndex][colIndex] = value;
       return { ...prev, sections: newSections };
     });
+  };
+
+  const handleFillHeaderChange = (field, value) => {
+    setFillData((prev) => ({
+      ...prev,
+      headerData: {
+        ...(prev?.headerData || {}),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleFillFooterChange = (field, value) => {
+    setFillData((prev) => ({
+      ...prev,
+      footerData: {
+        ...(prev?.footerData || {}),
+        [field]: value,
+      },
+    }));
   };
 
   // Save updated checklist
@@ -152,56 +227,37 @@ export default function Checklists() {
     openEdit(index);
   };
 
-  // Handle edit data changes
-  const handleEditChange = (field, value) => {
-    setEditData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleEditNameChange = (value) => {
+    setEditMeta((prev) => (prev ? { ...prev, name: value } : prev));
   };
 
-  // Handle edit metadata changes
   const handleEditMetadataChange = (field, value) => {
-    setEditData((prev) => ({
-      ...prev,
+    setEditMeta((prev) =>
+      prev
+        ? {
+            ...prev,
+            metadata: {
+              ...prev.metadata,
+              [field]: value,
+            },
+          }
+        : prev
+    );
+  };
+
+  const handleEditSubmit = (builderPayload) => {
+    if (editIndex === null || !editMeta) return;
+    const original = checklists[editIndex];
+    const updated = {
+      ...original,
+      ...builderPayload,
+      name: editMeta.name,
       metadata: {
-        ...prev.metadata,
-        [field]: value,
+        ...(original.metadata || {}),
+        ...(editMeta.metadata || {}),
       },
-    }));
-  };
-
-  // Handle edit cell changes
-  const handleEditCellChange = (sectionIndex, rowIndex, colIndex, value) => {
-    setEditData((prev) => {
-      const newSections = [...prev.sections];
-      newSections[sectionIndex].rows[rowIndex][colIndex] = value;
-      return { ...prev, sections: newSections };
-    });
-  };
-
-  // Handle edit header field changes
-  const handleEditHeaderFieldChange = (index, value) => {
-    setEditData((prev) => {
-      const newHeaderFields = [...prev.headerFields];
-      newHeaderFields[index] = value;
-      return { ...prev, headerFields: newHeaderFields };
-    });
-  };
-
-  // Handle edit footer field changes
-  const handleEditFooterFieldChange = (index, value) => {
-    setEditData((prev) => {
-      const newFooterFields = [...prev.footerFields];
-      newFooterFields[index] = value;
-      return { ...prev, footerFields: newFooterFields };
-    });
-  };
-
-  // Save edited checklist
-  const saveEdit = () => {
-    if (editIndex === null || !editData) return;
-    updateChecklist(editIndex, editData);
+    };
+    updateChecklist(editIndex, updated);
     closeEdit();
     alert("Checklist updated successfully!");
   };
@@ -260,13 +316,13 @@ export default function Checklists() {
             <Button size="sm" variant="outline" onClick={() => openEdit(index)}>
               Edit
             </Button>
-            <Button
+            {/* <Button
               size="sm"
               variant="outline"
               onClick={() => openUpdate(index)}
             >
               Update
-            </Button>
+            </Button> */}
             <Button
               size="sm"
               variant="destructive"
@@ -296,11 +352,7 @@ export default function Checklists() {
             <tr key={rowIndex} className="bg-white">
               {row.map((col, colIndex) => {
                 const getCellValue = () => {
-                  if (dataSource === "edit" && editData) {
-                    return editData.sections[sectionIndex].rows[rowIndex][
-                      colIndex
-                    ];
-                  } else if (dataSource === "fill" && fillData) {
+                  if (dataSource === "fill" && fillData) {
                     return fillData.sections[sectionIndex].rows[rowIndex][
                       colIndex
                     ];
@@ -309,16 +361,7 @@ export default function Checklists() {
                 };
 
                 const handleCellValueChange = (value) => {
-                  if (dataSource === "edit") {
-                    handleEditCellChange(
-                      sectionIndex,
-                      rowIndex,
-                      colIndex,
-                      value
-                    );
-                  } else {
-                    handleCellChange(sectionIndex, rowIndex, colIndex, value);
-                  }
+                  handleCellChange(sectionIndex, rowIndex, colIndex, value);
                 };
 
                 return (
@@ -390,13 +433,16 @@ export default function Checklists() {
         {item.headerFields && item.headerFields.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-3">Header Fields</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-blue-50 p-4 rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-blue-50 p-4 rounded-lg">
               {item.headerFields.map((field, idx) => (
                 <div
                   key={idx}
                   className="border border-blue-300 rounded p-2 bg-white"
                 >
-                  <p className="text-sm font-medium text-gray-700">{field}</p>
+                  <p className="text-sm font-semibold text-gray-700">{field}</p>
+                  <p className="text-xs text-gray-600">
+                    {item.headerData?.[field] || "—"}
+                  </p>
                 </div>
               ))}
             </div>
@@ -405,7 +451,9 @@ export default function Checklists() {
 
         {item.sections.map((section, i) => (
           <section key={i} className="mb-6">
-            <h3 className="text-xl font-semibold mb-2">Section {i + 1}</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              {section.title || `Section ${i + 1}`}
+            </h3>
             <ChecklistTable
               section={section}
               sectionIndex={i}
@@ -438,8 +486,11 @@ export default function Checklists() {
                           key={idx}
                           className="border border-green-500 rounded p-3 bg-white min-w-[120px]"
                         >
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-semibold text-gray-700">
                             {field}
+                          </p>
+                          <p className="text-xs text-gray-600 break-words">
+                            {item.footerData?.[field] || "—"}
                           </p>
                         </div>
                       ))}
@@ -454,8 +505,11 @@ export default function Checklists() {
                         key={idx}
                         className="border border-green-300 rounded p-2 bg-white"
                       >
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-sm font-semibold text-gray-700">
                           {field}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {item.footerData?.[field] || "—"}
                         </p>
                       </div>
                     ))}
@@ -470,13 +524,12 @@ export default function Checklists() {
 
   // Edit Modal component
   function EditModal() {
-    if (editIndex === null || !editData) return null;
+    if (editIndex === null || !editMeta || !editBuilderInitial) return null;
 
     return (
       <Modal closeHandler={closeEdit}>
-        <h2 className="text-2xl font-semibold mb-4">Edit: {editData.name}</h2>
+        <h2 className="text-2xl font-semibold mb-4">Edit: {editMeta.name}</h2>
 
-        {/* Checklist Name */}
         <div className="mb-6">
           <Label htmlFor="edit-name" className="block font-semibold mb-2">
             Checklist Name
@@ -484,105 +537,53 @@ export default function Checklists() {
           <Input
             id="edit-name"
             type="text"
-            value={editData.name || ""}
-            onChange={(e) => handleEditChange("name", e.target.value)}
+            value={editMeta.name || ""}
+            onChange={(e) => handleEditNameChange(e.target.value)}
             className="w-full"
           />
         </div>
 
-        {/* Metadata */}
         <div className="bg-gray-100 p-4 rounded-lg mb-6 space-y-4">
           <MetadataInput
             label="Created By"
-            value={editData.metadata?.createdBy || ""}
+            value={editMeta.metadata?.createdBy || ""}
             onChange={(val) => handleEditMetadataChange("createdBy", val)}
           />
           <MetadataInput
             label="Approved By"
-            value={editData.metadata?.approvedBy || ""}
+            value={editMeta.metadata?.approvedBy || ""}
             onChange={(val) => handleEditMetadataChange("approvedBy", val)}
           />
           <MetadataInput
             label="Effective Date"
             type="date"
-            value={editData.metadata?.effectiveDate || ""}
+            value={editMeta.metadata?.effectiveDate || ""}
             onChange={(val) => handleEditMetadataChange("effectiveDate", val)}
           />
         </div>
 
-        {/* Header Fields */}
-        {editData.headerFields && editData.headerFields.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Header Fields</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-blue-50 p-4 rounded-lg">
-              {editData.headerFields.map((field, idx) => (
-                <div
-                  key={idx}
-                  className="border border-blue-300 rounded p-2 bg-white"
-                >
-                  <input
-                    type="text"
-                    className="w-full p-1 border border-gray-300 rounded text-sm"
-                    value={field}
-                    onChange={(e) =>
-                      handleEditHeaderFieldChange(idx, e.target.value)
-                    }
-                  />
-                </div>
-              ))}
+        <ChecklistBuilderForm
+          initialData={editBuilderInitial}
+          onSubmit={handleEditSubmit}
+          submitLabel="Save Changes"
+          showDownloadActions={false}
+          floatingActionBar={false}
+          title=""
+          stateKey={editBuilderKey}
+          renderActions={({ handleSubmit }) => (
+            <div className="flex justify-end gap-2 mt-6">
+              <Button onClick={closeEdit} variant="outline" className="px-4 py-2">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2"
+              >
+                Save Changes
+              </Button>
             </div>
-          </div>
-        )}
-
-        {/* Sections */}
-        {editData.sections.map((section, i) => (
-          <section key={i} className="mb-6">
-            <h3 className="text-xl font-semibold mb-2">Section {i + 1}</h3>
-            <ChecklistTable
-              section={section}
-              sectionIndex={i}
-              editable={true}
-              dataSource="edit"
-            />
-          </section>
-        ))}
-
-        {/* Footer Fields */}
-        {editData.footerFields && editData.footerFields.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-3">Footer Fields</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-green-50 p-4 rounded-lg">
-              {editData.footerFields.map((field, idx) => (
-                <div
-                  key={idx}
-                  className="border border-green-300 rounded p-2 bg-white"
-                >
-                  <input
-                    type="text"
-                    className="w-full p-1 border border-gray-300 rounded text-sm"
-                    value={field}
-                    onChange={(e) =>
-                      handleEditFooterFieldChange(idx, e.target.value)
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Save Button */}
-        <div className="flex justify-end space-x-2 mt-6">
-          <Button onClick={closeEdit} variant="outline" className="px-4 py-2">
-            Cancel
-          </Button>
-          <Button
-            onClick={saveEdit}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2"
-          >
-            Save Changes
-          </Button>
-        </div>
+          )}
+        />
       </Modal>
     );
   }
@@ -614,9 +615,34 @@ export default function Checklists() {
           />
         </div>
 
+        {fillData.headerFields && fillData.headerFields.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Header Fields</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg">
+              {fillData.headerFields.map((field, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col gap-2 border border-blue-200 rounded p-3 bg-white"
+                >
+                  <Label className="text-sm font-semibold text-gray-700">
+                    {field}
+                  </Label>
+                  <Input
+                    value={fillData.headerData?.[field] || ""}
+                    onChange={(e) => handleFillHeaderChange(field, e.target.value)}
+                    placeholder={`Enter ${field}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {fillData.sections.map((section, i) => (
           <section key={i} className="mb-6">
-            <h3 className="text-xl font-semibold mb-2">Section {i + 1}</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              {section.title || `Section ${i + 1}`}
+            </h3>
             <ChecklistTable
               section={section}
               sectionIndex={i}
@@ -625,6 +651,29 @@ export default function Checklists() {
           </section>
         ))}
 
+        {fillData.footerFields && fillData.footerFields.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Footer Fields</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-green-50 p-4 rounded-lg">
+              {fillData.footerFields.map((field, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col gap-2 border border-green-200 rounded p-3 bg-white"
+                >
+                  <Label className="text-sm font-semibold text-gray-700">
+                    {field}
+                  </Label>
+                  <Input
+                    value={fillData.footerData?.[field] || ""}
+                    onChange={(e) => handleFillFooterChange(field, e.target.value)}
+                    placeholder={`Enter ${field}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex space-x-2">
           <button
             onClick={saveFilled}
@@ -632,12 +681,12 @@ export default function Checklists() {
           >
             💾 Save Changes
           </button>
-          <button
+          {/* <button
             onClick={saveAsNew}
             className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 focus:outline-none"
           >
             📘 Save As New Version
-          </button>
+          </button> */}
         </div>
       </Modal>
     );
