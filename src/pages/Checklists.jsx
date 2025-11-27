@@ -47,6 +47,8 @@ export default function Checklists() {
   const [viewIndex, setViewIndex] = React.useState(null);
   const [fillIndex, setFillIndex] = React.useState(null);
   const [fillData, setFillData] = React.useState(null);
+  const [editIndex, setEditIndex] = React.useState(null);
+  const [editData, setEditData] = React.useState(null);
 
   // New state for search text
   const [searchText, setSearchText] = React.useState("");
@@ -54,6 +56,20 @@ export default function Checklists() {
   // Handlers for modals
   const openView = (index) => setViewIndex(index);
   const closeView = () => setViewIndex(null);
+
+  const openEdit = (index) => {
+    const checklist = checklists[index];
+    setEditIndex(index);
+    setEditData({
+      ...JSON.parse(JSON.stringify(checklist)),
+      headerFields: checklist.headerFields || [],
+      footerFields: checklist.footerFields || [],
+    });
+  };
+  const closeEdit = () => {
+    setEditIndex(null);
+    setEditData(null);
+  };
 
   const openFill = (index) => {
     const checklist = checklists[index];
@@ -131,6 +147,65 @@ export default function Checklists() {
     deleteChecklist(index);
   };
 
+  // Open edit/update modal (uses Edit functionality)
+  const openUpdate = (index) => {
+    openEdit(index);
+  };
+
+  // Handle edit data changes
+  const handleEditChange = (field, value) => {
+    setEditData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Handle edit metadata changes
+  const handleEditMetadataChange = (field, value) => {
+    setEditData((prev) => ({
+      ...prev,
+      metadata: {
+        ...prev.metadata,
+        [field]: value,
+      },
+    }));
+  };
+
+  // Handle edit cell changes
+  const handleEditCellChange = (sectionIndex, rowIndex, colIndex, value) => {
+    setEditData((prev) => {
+      const newSections = [...prev.sections];
+      newSections[sectionIndex].rows[rowIndex][colIndex] = value;
+      return { ...prev, sections: newSections };
+    });
+  };
+
+  // Handle edit header field changes
+  const handleEditHeaderFieldChange = (index, value) => {
+    setEditData((prev) => {
+      const newHeaderFields = [...prev.headerFields];
+      newHeaderFields[index] = value;
+      return { ...prev, headerFields: newHeaderFields };
+    });
+  };
+
+  // Handle edit footer field changes
+  const handleEditFooterFieldChange = (index, value) => {
+    setEditData((prev) => {
+      const newFooterFields = [...prev.footerFields];
+      newFooterFields[index] = value;
+      return { ...prev, footerFields: newFooterFields };
+    });
+  };
+
+  // Save edited checklist
+  const saveEdit = () => {
+    if (editIndex === null || !editData) return;
+    updateChecklist(editIndex, editData);
+    closeEdit();
+    alert("Checklist updated successfully!");
+  };
+
   // Internal reusable component: ChecklistRow for main list
   function ChecklistRow({ item, index }) {
     return (
@@ -148,31 +223,63 @@ export default function Checklists() {
         <td className="border border-gray-300 px-4 py-2">
           {item.approved ? "Approved" : "Pending"}
         </td>
-        <td className="border border-gray-300 px-4 py-2 space-x-2">
-          <Button
-            onClick={() => openView(index)}
-            className="bg-blue-700 hover:bg-blue-800 text-white text-sm rounded px-3 py-1"
-          >
-            View
-          </Button>
-          <Button
-            onClick={() => openFill(index)}
-            className="bg-teal-600 hover:bg-teal-700 text-white text-sm rounded px-3 py-1"
-          >
-            Fill
-          </Button>
-          <Button
-            onClick={() => approveItem(index)}
-            className="bg-green-600 hover:bg-green-700 text-white text-sm rounded px-3 py-1"
-          >
-            Approve
-          </Button>
-          <Button
-            onClick={() => deleteItem(index)}
-            className="bg-red-600 hover:bg-red-700 text-white text-sm rounded px-3 py-1"
-          >
-            Delete
-          </Button>
+        <td className="border border-gray-300 px-4 py-2">
+          <div className="space-y-2">
+            {/* CRUD Operations Section */}
+            <div className="flex flex-wrap gap-1 items-center">
+              <span className="text-xs font-semibold text-gray-600 mr-1 whitespace-nowrap">
+                Actions:
+              </span>
+              <Button
+                onClick={() => openEdit(index)}
+                className="bg-purple-600 hover:bg-purple-700 text-white text-xs rounded px-2 py-1"
+                title="Edit checklist"
+              >
+                Edit
+              </Button>
+              <Button
+                onClick={() => openView(index)}
+                className="bg-blue-700 hover:bg-blue-800 text-white text-xs rounded px-2 py-1"
+                title="View (Read) checklist"
+              >
+                View
+              </Button>
+              <Button
+                onClick={() => openUpdate(index)}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded px-2 py-1"
+                title="Update checklist"
+              >
+                Update
+              </Button>
+              <Button
+                onClick={() => deleteItem(index)}
+                className="bg-red-600 hover:bg-red-700 text-white text-xs rounded px-2 py-1"
+                title="Delete checklist"
+              >
+                Delete
+              </Button>
+            </div>
+            {/* Workflow Actions Section */}
+            <div className="flex flex-wrap gap-1 items-center">
+              <span className="text-xs font-semibold text-gray-600 mr-1 whitespace-nowrap">
+                Other:
+              </span>
+              <Button
+                onClick={() => approveItem(index)}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs rounded px-2 py-1"
+                title="Approve checklist"
+              >
+                Approve
+              </Button>
+              <Button
+                onClick={() => openFill(index)}
+                className="bg-teal-600 hover:bg-teal-700 text-white text-xs rounded px-2 py-1"
+                title="Fill checklist"
+              >
+                Fill
+              </Button>
+            </div>
+          </div>
         </td>
       </tr>
     );
@@ -180,35 +287,60 @@ export default function Checklists() {
 
   // Internal reusable component: ChecklistTable for sections inside modals
   // editable: if true, text inputs appear; else plain text display
-  function ChecklistTable({ section, sectionIndex, editable }) {
+  // dataSource: 'fill' or 'edit' to determine which data source to use
+  function ChecklistTable({
+    section,
+    sectionIndex,
+    editable,
+    dataSource = "fill",
+  }) {
     return (
       <table className="w-full border-collapse border border-gray-300">
         <tbody>
           {section.rows.map((row, rowIndex) => (
             <tr key={rowIndex} className="bg-white">
-              {row.map((col, colIndex) => (
-                <td key={colIndex} className="border border-gray-300 p-2">
-                  {editable ? (
-                    <input
-                      type="text"
-                      className="w-full p-1 border border-gray-300 rounded"
-                      value={
-                        fillData.sections[sectionIndex].rows[rowIndex][colIndex]
-                      }
-                      onChange={(e) =>
-                        handleCellChange(
-                          sectionIndex,
-                          rowIndex,
-                          colIndex,
-                          e.target.value
-                        )
-                      }
-                    />
-                  ) : (
-                    col
-                  )}
-                </td>
-              ))}
+              {row.map((col, colIndex) => {
+                const getCellValue = () => {
+                  if (dataSource === "edit" && editData) {
+                    return editData.sections[sectionIndex].rows[rowIndex][
+                      colIndex
+                    ];
+                  } else if (dataSource === "fill" && fillData) {
+                    return fillData.sections[sectionIndex].rows[rowIndex][
+                      colIndex
+                    ];
+                  }
+                  return col;
+                };
+
+                const handleCellValueChange = (value) => {
+                  if (dataSource === "edit") {
+                    handleEditCellChange(
+                      sectionIndex,
+                      rowIndex,
+                      colIndex,
+                      value
+                    );
+                  } else {
+                    handleCellChange(sectionIndex, rowIndex, colIndex, value);
+                  }
+                };
+
+                return (
+                  <td key={colIndex} className="border border-gray-300 p-2">
+                    {editable ? (
+                      <input
+                        type="text"
+                        className="w-full p-1 border border-gray-300 rounded"
+                        value={getCellValue()}
+                        onChange={(e) => handleCellValueChange(e.target.value)}
+                      />
+                    ) : (
+                      col
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -337,6 +469,125 @@ export default function Checklists() {
               </div>
             );
           })()}
+      </Modal>
+    );
+  }
+
+  // Edit Modal component
+  function EditModal() {
+    if (editIndex === null || !editData) return null;
+
+    return (
+      <Modal closeHandler={closeEdit}>
+        <h2 className="text-2xl font-semibold mb-4">Edit: {editData.name}</h2>
+
+        {/* Checklist Name */}
+        <div className="mb-6">
+          <Label htmlFor="edit-name" className="block font-semibold mb-2">
+            Checklist Name
+          </Label>
+          <Input
+            id="edit-name"
+            type="text"
+            value={editData.name || ""}
+            onChange={(e) => handleEditChange("name", e.target.value)}
+            className="w-full"
+          />
+        </div>
+
+        {/* Metadata */}
+        <div className="bg-gray-100 p-4 rounded-lg mb-6 space-y-4">
+          <MetadataInput
+            label="Created By"
+            value={editData.metadata?.createdBy || ""}
+            onChange={(val) => handleEditMetadataChange("createdBy", val)}
+          />
+          <MetadataInput
+            label="Approved By"
+            value={editData.metadata?.approvedBy || ""}
+            onChange={(val) => handleEditMetadataChange("approvedBy", val)}
+          />
+          <MetadataInput
+            label="Effective Date"
+            type="date"
+            value={editData.metadata?.effectiveDate || ""}
+            onChange={(val) => handleEditMetadataChange("effectiveDate", val)}
+          />
+        </div>
+
+        {/* Header Fields */}
+        {editData.headerFields && editData.headerFields.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Header Fields</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-blue-50 p-4 rounded-lg">
+              {editData.headerFields.map((field, idx) => (
+                <div
+                  key={idx}
+                  className="border border-blue-300 rounded p-2 bg-white"
+                >
+                  <input
+                    type="text"
+                    className="w-full p-1 border border-gray-300 rounded text-sm"
+                    value={field}
+                    onChange={(e) =>
+                      handleEditHeaderFieldChange(idx, e.target.value)
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Sections */}
+        {editData.sections.map((section, i) => (
+          <section key={i} className="mb-6">
+            <h3 className="text-xl font-semibold mb-2">Section {i + 1}</h3>
+            <ChecklistTable
+              section={section}
+              sectionIndex={i}
+              editable={true}
+              dataSource="edit"
+            />
+          </section>
+        ))}
+
+        {/* Footer Fields */}
+        {editData.footerFields && editData.footerFields.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-3">Footer Fields</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-green-50 p-4 rounded-lg">
+              {editData.footerFields.map((field, idx) => (
+                <div
+                  key={idx}
+                  className="border border-green-300 rounded p-2 bg-white"
+                >
+                  <input
+                    type="text"
+                    className="w-full p-1 border border-gray-300 rounded text-sm"
+                    value={field}
+                    onChange={(e) =>
+                      handleEditFooterFieldChange(idx, e.target.value)
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Save Button */}
+        <div className="flex justify-end space-x-2 mt-6">
+          <Button onClick={closeEdit} variant="outline" className="px-4 py-2">
+            Cancel
+          </Button>
+          <Button
+            onClick={saveEdit}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2"
+          >
+            Save Changes
+          </Button>
+        </div>
       </Modal>
     );
   }
@@ -549,6 +800,7 @@ export default function Checklists() {
       </Card>
 
       <ViewModal />
+      <EditModal />
       <FillModal />
     </div>
   );
