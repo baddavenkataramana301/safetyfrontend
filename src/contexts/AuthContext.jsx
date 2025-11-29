@@ -105,6 +105,21 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
 
+    // Add login points automatically (only once per day)
+    try {
+      const { addLoginPoints } = await import("@/lib/pointUtils");
+      // Map role correctly
+      let roleForPoints = normalizedRole;
+      if (normalizedRole === "safety_manager" || normalizedRole === "manager") {
+        roleForPoints = "safety_manager";
+      }
+      if (roleForPoints !== "admin") {
+        addLoginPoints(foundUser.id, roleForPoints);
+      }
+    } catch (error) {
+      console.error("Error adding login points:", error);
+    }
+
     // After login, redirect to role-specific dashboard
     redirectToDashboard(userData.role);
   };
