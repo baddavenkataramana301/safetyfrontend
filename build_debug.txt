@@ -1,0 +1,130 @@
+﻿
+> vite_react_shadcn_js@0.0.0 build
+> vite build
+
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+transforming...
+node.exe : 
+Browserslist: 
+browsers data 
+(caniuse-lite) is 6 
+months old. Please 
+run:
+At C:\Program Files\n
+odejs\npm.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Browser   
+ slist: b...ld. P    
+lease run::Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+  npx update-browsers
+list-db@latest
+  Why you should do 
+it regularly: https:/
+/github.com/browsersl
+ist/update-db#readme
+[32mΓ£ô[39m 95 modules transformed.
+[31mx[39m Build 
+failed in 3.94s
+[31merror during 
+build:
+[31msrc/lib/pointUti
+ls.js (294:9): 
+Duplicate export 
+"POINT_SYSTEM"[31m
+file: [36mC:/Users/s
+aiku/OneDrive/Desktop
+/safetyfrontend/src/l
+ib/pointUtils.js:294:
+9[31m
+[33m
+292: };
+293: 
+294: export { 
+POINT_SYSTEM };
+              ^
+[31m
+    at 
+getRollupError (file:
+///C:/Users/saiku/One
+Drive/Desktop/safetyf
+rontend/node_modules/
+rollup/dist/es/shared
+/parseAst.js:395:41)
+    at error (file://
+/C:/Users/saiku/OneDr
+ive/Desktop/safetyfro
+ntend/node_modules/ro
+llup/dist/es/shared/p
+arseAst.js:391:42)
+    at Module.error (
+file:///C:/Users/saik
+u/OneDrive/Desktop/sa
+fetyfrontend/node_mod
+ules/rollup/dist/es/s
+hared/node-entry.js:1
+5535:16)
+    at Module.assertU
+niqueExportName (file
+:///C:/Users/saiku/On
+eDrive/Desktop/safety
+frontend/node_modules
+/rollup/dist/es/share
+d/node-entry.js:16017
+:18)
+    at 
+Module.addExport (fil
+e:///C:/Users/saiku/O
+neDrive/Desktop/safet
+yfrontend/node_module
+s/rollup/dist/es/shar
+ed/node-entry.js:1608
+8:22)
+    at ExportNamedDec
+laration.initialise (
+file:///C:/Users/saik
+u/OneDrive/Desktop/sa
+fetyfrontend/node_mod
+ules/rollup/dist/es/s
+hared/node-entry.js:1
+1691:28)
+    at convertNode (f
+ile:///C:/Users/saiku
+/OneDrive/Desktop/saf
+etyfrontend/node_modu
+les/rollup/dist/es/sh
+ared/node-entry.js:14
+939:10)
+    at 
+convertNodeList (file
+:///C:/Users/saiku/On
+eDrive/Desktop/safety
+frontend/node_modules
+/rollup/dist/es/share
+d/node-entry.js:14949
+:34)
+    at Array.program 
+(file:///C:/Users/sai
+ku/OneDrive/Desktop/s
+afetyfrontend/node_mo
+dules/rollup/dist/es/
+shared/node-entry.js:
+14799:21)
+    at convertNode (f
+ile:///C:/Users/saiku
+/OneDrive/Desktop/saf
+etyfrontend/node_modu
+les/rollup/dist/es/sh
+ared/node-entry.js:14
+938:28)[39m

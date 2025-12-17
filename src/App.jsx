@@ -37,7 +37,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <HashRouter basename="/">
+      <HashRouter
+        basename="/"
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <AuthProvider>
           <ChecklistProvider>
             <Routes>

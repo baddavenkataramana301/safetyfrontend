@@ -1,0 +1,127 @@
+﻿
+> vite_react_shadcn_js@0.0.0 build
+> vite build
+
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+transforming...
+node.exe : 
+Browserslist: 
+browsers data 
+(caniuse-lite) is 6 
+months old. Please 
+run:
+At C:\Program Files\n
+odejs\npm.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Browser   
+ slist: b...ld. P    
+lease run::Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+  npx update-browsers
+list-db@latest
+  Why you should do 
+it regularly: https:/
+/github.com/browsersl
+ist/update-db#readme
+[32mΓ£ô[39m 1777 modules transformed.
+[31mx[39m Build 
+failed in 7.87s
+[31merror during 
+build:
+[31m[vite:esbuild] 
+Transform failed 
+with 1 error:
+C:/Users/saiku/OneDri
+ve/Desktop/safetyfron
+tend/src/components/u
+i/separator.jsx:7:50:
+ ERROR: Unexpected 
+","[31m
+file: [36mC:/Users/s
+aiku/OneDrive/Desktop
+/safetyfrontend/src/c
+omponents/ui/separato
+r.jsx:7:50[31m
+[33m
+[33mUnexpected 
+","[33m
+5  |  
+6  |  const 
+Separator = 
+React.forwardRef<
+7  |    React.Element
+Ref<typeof SeparatorP
+rimitive.Root>,
+   |                 
+                     
+              ^
+8  |    React.Compone
+ntPropsWithoutRef<typ
+eof SeparatorPrimitiv
+e.Root>
+9  |  >(({ 
+className, 
+orientation = 
+"horizontal", 
+decorative = true, 
+...props }, ref) => (
+[31m
+    at 
+failureErrorWithLog (
+C:\Users\saiku\OneDri
+ve\Desktop\safetyfron
+tend\node_modules\esb
+uild\lib\main.js:1472
+:15)
+    at C:\Users\saiku
+\OneDrive\Desktop\saf
+etyfrontend\node_modu
+les\esbuild\lib\main.
+js:755:50
+    at responseCallba
+cks.<computed> (C:\Us
+ers\saiku\OneDrive\De
+sktop\safetyfrontend\
+node_modules\esbuild\
+lib\main.js:622:9)
+    at 
+handleIncomingPacket 
+(C:\Users\saiku\OneDr
+ive\Desktop\safetyfro
+ntend\node_modules\es
+build\lib\main.js:677
+:12)
+    at Socket.readFro
+mStdout (C:\Users\sai
+ku\OneDrive\Desktop\s
+afetyfrontend\node_mo
+dules\esbuild\lib\mai
+n.js:600:7)
+    at Socket.emit 
+(node:events:518:28)
+    at addChunk (node
+:internal/streams/rea
+dable:561:12)
+    at readableAddChu
+nkPushByteMode (node:
+internal/streams/read
+able:512:3)
+    at Readable.push 
+(node:internal/stream
+s/readable:392:5)
+    at 
+Pipe.onStreamRead (no
+de:internal/stream_ba
+se_commons:189:23)[3
+9m

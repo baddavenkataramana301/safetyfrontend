@@ -117,49 +117,81 @@ export const getDailyPoints = (userId, month, year) => {
   );
 };
 
-// Point system reference (should match Rewards.jsx)
-const POINT_SYSTEM = {
-  employee: {
-    earnings: [
-      { activity: "Daily login / attendance", points: 5 },
-      { activity: "Completing assigned safety tasks", points: 20 },
-      { activity: "Reporting a safety incident / hazard", points: 30 },
-      { activity: "Completing safety training module", points: 50 },
-      { activity: "Participating in safety quiz", points: 15 },
-      { activity: "Zero violations for the week", points: 40 },
-    ],
-    deductions: [
-      { rule: "Safety violation", points: -30 },
-      { rule: "Incomplete task", points: -10 },
-    ],
-  },
-  supervisor: {
-    earnings: [
-      { activity: "Approving employee safety task", points: 10 },
-      { activity: "Reviewing safety incident report", points: 15 },
-      { activity: "Assigning tasks on time", points: 5 },
-      { activity: "Weekly safety meeting completed", points: 20 },
-      { activity: "No incidents in team", points: 50 },
-    ],
-    deductions: [
-      { rule: "Pending approvals not done in time", points: -10 },
-      { rule: "Ignoring safety violation", points: -20 },
-    ],
-  },
-  safety_manager: {
-    earnings: [
-      { activity: "Approving supervisor reports", points: 20 },
-      { activity: "Closing safety cases", points: 30 },
-      { activity: "Uploading safety documents/policies", points: 25 },
-      { activity: "Conducting safety audits", points: 40 },
-      { activity: "Achieving monthly safety KPI", points: 50 },
-    ],
-    deductions: [
-      { rule: "Incomplete audit", points: -20 },
-      { rule: "Late approval", points: -10 },
-    ],
-  },
+// Point system reference (dynamic)
+let POINT_SYSTEM_CACHE = null;
+
+export const getPointSystem = () => {
+  if (POINT_SYSTEM_CACHE) return POINT_SYSTEM_CACHE;
+
+  const stored = localStorage.getItem("pointSystemRules");
+  if (stored) {
+    POINT_SYSTEM_CACHE = JSON.parse(stored);
+    return POINT_SYSTEM_CACHE;
+  }
+
+  // Default system if not in storage
+  const defaultSystem = {
+    employee: {
+      earnings: [
+        { activity: "Daily login / attendance", points: 5 },
+        { activity: "Completing assigned safety tasks", points: 20 },
+        { activity: "Reporting a safety incident / hazard", points: 30 },
+        { activity: "Completing safety training module", points: 50 },
+        { activity: "Participating in safety quiz", points: 15 },
+        { activity: "Zero violations for the week", points: 40 },
+        { activity: "Course Completion", points: 100 }, // Added for Course
+      ],
+      deductions: [
+        { rule: "Safety violation", points: -30 },
+        { rule: "Incomplete task", points: -10 },
+      ],
+    },
+    supervisor: {
+      earnings: [
+        { activity: "Approving employee safety task", points: 10 },
+        { activity: "Reviewing safety incident report", points: 15 },
+        { activity: "Assigning tasks on time", points: 5 },
+        { activity: "Weekly safety meeting completed", points: 20 },
+        { activity: "No incidents in team", points: 50 },
+      ],
+      deductions: [
+        { rule: "Pending approvals not done in time", points: -10 },
+        { rule: "Ignoring safety violation", points: -20 },
+      ],
+    },
+    safety_manager: {
+      earnings: [
+        { activity: "Approving supervisor reports", points: 20 },
+        { activity: "Closing safety cases", points: 30 },
+        { activity: "Uploading safety documents/policies", points: 25 },
+        { activity: "Conducting safety audits", points: 40 },
+        { activity: "Achieving monthly safety KPI", points: 50 },
+      ],
+      deductions: [
+        { rule: "Incomplete audit", points: -20 },
+        { rule: "Late approval", points: -10 },
+      ],
+    },
+  };
+
+  localStorage.setItem("pointSystemRules", JSON.stringify(defaultSystem));
+  POINT_SYSTEM_CACHE = defaultSystem;
+  return defaultSystem;
 };
+
+export const savePointRules = (newRules) => {
+  localStorage.setItem("pointSystemRules", JSON.stringify(newRules));
+  POINT_SYSTEM_CACHE = newRules;
+  // Dispatch event to notify components
+  window.dispatchEvent(new Event("pointRulesUpdated"));
+};
+
+// Deprecated direct export, mapped to getter for backward compatibility
+export const POINT_SYSTEM = new Proxy({}, {
+  get: function(target, prop) {
+    return getPointSystem()[prop];
+  }
+});
 
 // Initialize dummy point data for a user
 export const initializeDummyPoints = (userId, role, userName) => {
@@ -259,4 +291,4 @@ export const initializeAllDummyPoints = () => {
   });
 };
 
-export { POINT_SYSTEM };
+

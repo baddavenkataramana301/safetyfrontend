@@ -69,52 +69,20 @@ import {
   getMonthlyHistory,
   addLoginPoints,
   initializeAllDummyPoints,
+  getPointSystem,
+  savePointRules,
 } from "@/lib/pointUtils";
 import { toast } from "sonner";
 
-// Point system definitions
-const POINT_SYSTEM = {
-  employee: {
-    earnings: [
-      { activity: "Daily login / attendance", points: 5 },
-      { activity: "Completing assigned safety tasks", points: 20 },
-      { activity: "Reporting a safety incident / hazard", points: 30 },
-      { activity: "Completing safety training module", points: 50 },
-      { activity: "Participating in safety quiz", points: 15 },
-      { activity: "Zero violations for the week", points: 40 },
-    ],
-    deductions: [
-      { rule: "Safety violation", points: -30 },
-      { rule: "Incomplete task", points: -10 },
-    ],
-  },
-  supervisor: {
-    earnings: [
-      { activity: "Approving employee safety task", points: 10 },
-      { activity: "Reviewing safety incident report", points: 15 },
-      { activity: "Assigning tasks on time", points: 5 },
-      { activity: "Weekly safety meeting completed", points: 20 },
-      { activity: "No incidents in team", points: 50 },
-    ],
-    deductions: [
-      { rule: "Pending approvals not done in time", points: -10 },
-      { rule: "Ignoring safety violation", points: -20 },
-    ],
-  },
-  safety_manager: {
-    earnings: [
-      { activity: "Approving supervisor reports", points: 20 },
-      { activity: "Closing safety cases", points: 30 },
-      { activity: "Uploading safety documents/policies", points: 25 },
-      { activity: "Conducting safety audits", points: 40 },
-      { activity: "Achieving monthly safety KPI", points: 50 },
-    ],
-    deductions: [
-      { rule: "Incomplete audit", points: -20 },
-      { rule: "Late approval", points: -10 },
-    ],
-  },
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+const TYPE_COLORS = {
+  earning: "#22c55e",
+  deduction: "#ef4444",
 };
+
+
+// Point system loaded dynamically now
+const POINT_SYSTEM = getPointSystem();
 
 // Generate dummy point history data
 const generatePointHistory = (role, userId, userName) => {
@@ -326,7 +294,7 @@ const MonthHistoryCard = ({
     deduction: "#ef4444", // red
   };
 
-  const getColorByType = (type) => COLORS[type] || "#8884d8";
+  const getColorByType = (type) => TYPE_COLORS[type] || "#8884d8";
 
   const handleDeleteActivity = (activityId) => {
     if (!isAdmin) return;
@@ -723,7 +691,7 @@ const MonthlyRewardsSection = ({ pointHistory, user, userRole, isAdmin }) => {
     deduction: "#ef4444",
   };
 
-  const getColorByType = (type) => COLORS[type] || "#8884d8";
+  const getColorByType = (type) => TYPE_COLORS[type] || "#8884d8";
 
   const handleUpdate = () => {
     setRefreshKey((k) => k + 1);
@@ -1254,6 +1222,47 @@ const Rewards = () => {
   const [rankings, setRankings] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [rules, setRules] = useState(getPointSystem());
+  const [isEditingRules, setIsEditingRules] = useState(false);
+  const [editedRules, setEditedRules] = useState(rules);
+
+  useEffect(() => {
+     // Listen for rule updates from other tabs/windows
+     const handleRulesUpdate = () => {
+        setRules(getPointSystem());
+        setEditedRules(getPointSystem());
+     };
+     window.addEventListener("pointRulesUpdated", handleRulesUpdate);
+     return () => window.removeEventListener("pointRulesUpdated", handleRulesUpdate);
+  }, []);
+
+  const handleSaveRules = () => {
+    savePointRules(editedRules);
+    setIsEditingRules(false);
+    toast.success("Point rules updated successfully");
+  };
+
+  const handleRuleChange = (role, type, index, field, value) => {
+    const newRules = { ...editedRules };
+    newRules[role][type][index][field] = field === 'points' ? parseInt(value) || 0 : value;
+    setEditedRules(newRules);
+  };
+
+  const handleAddRule = (role, type) => {
+    const newRules = { ...editedRules };
+    const newRule = type === "earnings" 
+      ? { activity: "", points: 0 } 
+      : { rule: "", points: 0 };
+    newRules[role][type].push(newRule);
+    setEditedRules(newRules);
+  };
+
+  const handleRemoveRule = (role, type, index) => {
+    const newRules = { ...editedRules };
+    newRules[role][type].splice(index, 1);
+    setEditedRules(newRules);
+  };
+
 
   useEffect(() => {
     if (!user) return;
@@ -2346,130 +2355,135 @@ const Rewards = () => {
           </TabsContent>
 
           <TabsContent value="point-system" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Employee Points</CardTitle>
-                  <CardDescription>Earning activities</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {POINT_SYSTEM.employee.earnings.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center text-sm"
-                      >
-                        <span className="truncate">{item.activity}</span>
-                        <Badge variant="default" className="ml-2">
-                          +{item.points}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <p className="text-sm font-semibold mb-2">Deductions:</p>
-                    {POINT_SYSTEM.employee.deductions.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center text-sm"
-                      >
-                        <span className="truncate">{item.rule}</span>
-                        <Badge variant="destructive" className="ml-2">
-                          {item.points}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Supervisor Points</CardTitle>
-                  <CardDescription>Earning activities</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {POINT_SYSTEM.supervisor.earnings.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center text-sm"
-                      >
-                        <span className="truncate">{item.activity}</span>
-                        <Badge variant="default" className="ml-2">
-                          +{item.points}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <p className="text-sm font-semibold mb-2">Deductions:</p>
-                    {POINT_SYSTEM.supervisor.deductions.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center text-sm"
-                      >
-                        <span className="truncate">{item.rule}</span>
-                        <Badge variant="destructive" className="ml-2">
-                          {item.points}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Manager Points</CardTitle>
-                  <CardDescription>Earning activities</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {POINT_SYSTEM.safety_manager.earnings.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center text-sm"
-                      >
-                        <span className="truncate">{item.activity}</span>
-                        <Badge variant="default" className="ml-2">
-                          +{item.points}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <p className="text-sm font-semibold mb-2">Deductions:</p>
-                    {POINT_SYSTEM.safety_manager.deductions.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center text-sm"
-                      >
-                        <span className="truncate">{item.rule}</span>
-                        <Badge variant="destructive" className="ml-2">
-                          {item.points}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                 <h3 className="text-lg font-medium">Point System Configuration</h3>
+                 <p className="text-sm text-muted-foreground">Customize how points are awarded and deducted per role.</p>
+              </div>
+              <div className="space-x-2">
+                {isEditingRules ? (
+                  <>
+                    <Button variant="outline" onClick={() => { setIsEditingRules(false); setEditedRules(rules); }}>Cancel</Button>
+                    <Button onClick={handleSaveRules}>Save Changes</Button>
+                  </>
+                ) : (
+                  <Button onClick={() => setIsEditingRules(true)}>Edit Rules</Button>
+                )}
+              </div>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Admins do not participate in the point-based reward system.
-                  Admins manage the system configuration, user accounts, and
-                  monitor overall system performance. Optional log-based
-                  achievement badges may be available for admin activities.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="grid gap-4 md:grid-cols-3">
+              {['employee', 'supervisor', 'safety_manager'].map((role) => (
+                <Card key={role}>
+                  <CardHeader>
+                    <CardTitle className="capitalize">{role.replace('_', ' ')} Points</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                       <div>
+                          <h4 className="text-sm font-semibold mb-2">Earnings</h4>
+                          <div className="space-y-2">
+                            {(isEditingRules ? editedRules : rules)[role].earnings.map((item, idx) => (
+                              <div key={idx} className="flex gap-2 items-center text-sm">
+                                {isEditingRules ? (
+                                  <>
+                                    <Input 
+                                      value={item.activity} 
+                                      onChange={(e) => handleRuleChange(role, 'earnings', idx, 'activity', e.target.value)}
+                                      className="h-8 text-xs"
+                                      placeholder="Activity Name"
+                                    />
+                                    <Input 
+                                      type="number"
+                                      value={item.points} 
+                                      onChange={(e) => handleRuleChange(role, 'earnings', idx, 'points', e.target.value)}
+                                      className="w-16 h-8 text-xs text-right"
+                                    />
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => handleRemoveRule(role, 'earnings', idx)}
+                                      className="h-8 w-8 text-destructive hover:text-destructive/90"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="truncate flex-1">{item.activity}</span>
+                                    <Badge variant="default">+{item.points}</Badge>
+                                  </>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          {isEditingRules && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleAddRule(role, 'earnings')}
+                              className="mt-2 w-full text-xs border-dashed"
+                            >
+                              <Plus className="h-3 w-3 mr-1" /> Add Earning Rule
+                            </Button>
+                          )}
+                       </div>
+                       
+                       <div className="border-t pt-4">
+                          <h4 className="text-sm font-semibold mb-2">Deductions</h4>
+                          <div className="space-y-2">
+                            {(isEditingRules ? editedRules : rules)[role].deductions.map((item, idx) => (
+                              <div key={idx} className="flex gap-2 items-center text-sm">
+                                {isEditingRules ? (
+                                  <>
+                                    <Input 
+                                      value={item.rule} 
+                                      onChange={(e) => handleRuleChange(role, 'deductions', idx, 'rule', e.target.value)}
+                                      className="h-8 text-xs"
+                                      placeholder="Violation Name"
+                                    />
+                                    <Input 
+                                      type="number"
+                                      value={item.points} 
+                                      onChange={(e) => handleRuleChange(role, 'deductions', idx, 'points', e.target.value)}
+                                      className="w-16 h-8 text-xs text-right"
+                                    />
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => handleRemoveRule(role, 'deductions', idx)}
+                                      className="h-8 w-8 text-destructive hover:text-destructive/90"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="truncate flex-1">{item.rule}</span>
+                                    <Badge variant="destructive">{item.points}</Badge>
+                                  </>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          {isEditingRules && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleAddRule(role, 'deductions')}
+                              className="mt-2 w-full text-xs border-dashed"
+                            >
+                              <Plus className="h-3 w-3 mr-1" /> Add Deduction Rule
+                            </Button>
+                          )}
+                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
+
         </Tabs>
       </div>
     </DashboardLayout>

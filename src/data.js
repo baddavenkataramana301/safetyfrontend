@@ -53,142 +53,156 @@ export const dummyUsers = [
   },
 ];
 
-export const dummyTrainings = [
+export const dummyCourses = [
   {
     id: 1,
-    title: "Safety Procedures Training",
-    type: "Safety",
-    description:
-      "Comprehensive training on workplace safety procedures and emergency response",
-    duration: "2 hours",
+    title: "Safety Procedures Mastery",
+    category: "Safety",
+    description: "Complete guide to workplace safety procedures and emergency response.",
+    level: "Beginner",
+    duration: "4 hours",
+    points: 100,
+    thumbnail: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fHNhZmV0eXxlbnwwfHwwfHx8MA%3D%3D",
     status: "Available",
-    assignedTo: "All Employees",
-    dueDate: "2024-02-15",
+    enrolledUserIds: [2, 3], 
+    modules: [
+      {
+        id: 101,
+        title: "Introduction to Safety",
+        lessons: [
+          {
+            id: 1001,
+            title: "Why Safety Matters",
+            type: "video",
+            content: "https://www.w3schools.com/html/mov_bbb.mp4",
+            duration: "10 min",
+            completedByUserIds: [2]
+          },
+          {
+            id: 1002,
+            title: "Safety Policy Overview",
+            type: "pdf",
+            content: "/assets/safety-policy.pdf",
+            duration: "15 min",
+            completedByUserIds: [2]
+          }
+        ]
+      },
+      {
+        id: 102,
+        title: "Emergency Response",
+        lessons: [
+           {
+            id: 1003,
+            title: "Fire Evacuation Procedures",
+            type: "video",
+            content: "https://www.w3schools.com/html/mov_bbb.mp4",
+            duration: "20 min",
+            completedByUserIds: []
+          },
+          {
+            id: 1004,
+            title: "First Aid Basics",
+            type: "article",
+            content: "Call 911 immediately in case of emergency...",
+            duration: "5 min",
+            completedByUserIds: []
+          }
+        ]
+      }
+    ],
+    quizId: 1,
     createdAt: new Date().toISOString(),
-    completedBy: [],
   },
   {
     id: 2,
-    title: "Hazard Identification Workshop",
-    type: "Technical",
-    description: "Learn to identify and report workplace hazards effectively",
-    duration: "1.5 hours",
-    status: "In Progress",
-    assignedTo: "All Employees",
-    dueDate: "2024-02-20",
+    title: "Advanced Hazard Identification",
+    category: "Technical",
+    description: "Learn to identify subtle workplace hazards before they cause accidents.",
+    level: "Advanced",
+    duration: "2.5 hours",
+    points: 150,
+    thumbnail: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW5kdXN0cmlhbCUyMHNhZmV0eXxlbnwwfHwwfHx8MA%3D%3D",
+    status: "Available",
+    enrolledUserIds: [2],
+     modules: [
+      {
+        id: 201,
+        title: "Types of Hazards",
+        lessons: [
+          {
+            id: 2001,
+            title: "Physical Hazards",
+            type: "video",
+            content: "https://www.w3schools.com/html/mov_bbb.mp4",
+            duration: "15 min",
+            completedByUserIds: []
+          }
+        ]
+      }
+    ],
+    quizId: 2,
     createdAt: new Date(Date.now() - 86400000).toISOString(),
-    completedBy: [],
   },
   {
     id: 3,
-    title: "Fire Safety Training",
-    type: "Safety",
-    description: "Essential fire safety protocols and evacuation procedures",
+    title: "Office Ergonomics",
+    category: "Health",
+    description: "Setup your workstation correctly to prevent long-term injury.",
+    level: "Intermediate",
     duration: "1 hour",
-    status: "Available",
-    assignedTo: "All Employees",
-    dueDate: "2024-03-01",
+    points: 50,
+    thumbnail: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8b2ZmaWNlfGVufDB8fDB8fHww",
+    status: "Published",
+    enrolledUserIds: [],
+    modules: [],
+    quizId: null,
     createdAt: new Date(Date.now() - 172800000).toISOString(),
-    completedBy: [],
-  },
-  {
-    id: 4,
-    title: "Equipment Maintenance Certification",
-    type: "Technical",
-    description: "Proper maintenance and inspection of workplace equipment",
-    duration: "3 hours",
-    status: "Available",
-    assignedTo: "Maintenance Team",
-    dueDate: "2024-03-10",
-    createdAt: new Date(Date.now() - 259200000).toISOString(),
-    completedBy: [],
-  },
-  {
-    id: 5,
-    title: "OSHA Compliance Overview",
-    type: "Compliance",
-    description: "Understanding OSHA regulations and compliance requirements",
-    duration: "2.5 hours",
-    status: "In Progress",
-    assignedTo: "Management",
-    dueDate: "2024-03-15",
-    createdAt: new Date(Date.now() - 345600000).toISOString(),
-    completedBy: [],
-  },
-  {
-    id: 6,
-    title: "First Aid and CPR Training",
-    type: "Safety",
-    description: "Basic first aid and CPR skills for emergency situations",
-    duration: "4 hours",
-    status: "Available",
-    assignedTo: "All Employees",
-    dueDate: "2024-03-20",
-    createdAt: new Date(Date.now() - 432000000).toISOString(),
-    completedBy: [],
-  },
-  {
-    id: 7,
-    title: "Chemical Handling Safety",
-    type: "Safety",
-    description: "Safe handling, storage, and disposal of hazardous chemicals",
-    duration: "2 hours",
-    status: "Completed",
-    assignedTo: "Lab Personnel",
-    dueDate: "2024-02-28",
-    createdAt: new Date(Date.now() - 518400000).toISOString(),
-    completedBy: ["John Doe", "Jane Smith"],
-  },
-  {
-    id: 8,
-    title: "Ergonomics and Workplace Wellness",
-    type: "General",
-    description:
-      "Preventing injuries through proper ergonomics and wellness practices",
-    duration: "1.5 hours",
-    status: "Available",
-    assignedTo: "Office Staff",
-    dueDate: "2024-03-25",
-    createdAt: new Date(Date.now() - 604800000).toISOString(),
-    completedBy: [],
-  },
-  {
-    id: 9,
-    title: "Emergency Response Planning",
-    type: "Safety",
-    description: "Developing and implementing emergency response plans",
-    duration: "3 hours",
-    status: "In Progress",
-    assignedTo: "Safety Team",
-    dueDate: "2024-04-01",
-    createdAt: new Date(Date.now() - 691200000).toISOString(),
-    completedBy: [],
-  },
-  {
-    id: 10,
-    title: "Data Security and Privacy Training",
-    type: "Compliance",
-    description: "Protecting sensitive data and maintaining privacy standards",
-    duration: "2 hours",
-    status: "Available",
-    assignedTo: "IT Department",
-    dueDate: "2024-04-05",
-    createdAt: new Date(Date.now() - 777600000).toISOString(),
-    completedBy: [],
-  },
-  {
-    id: 11,
-    title: "Leadership Safety Communication",
-    type: "General",
-    description: "Effective communication of safety policies and procedures",
-    duration: "2.5 hours",
-    status: "Available",
-    assignedTo: "Supervisors",
-    dueDate: "2024-04-10",
-    createdAt: new Date(Date.now() - 864000000).toISOString(),
-    completedBy: [],
-  },
+  }
 ];
+
+export const dummyQuizzes = [
+  {
+    id: 1,
+    courseId: 1,
+    title: "Safety Mastery Final Assessment",
+    passingScore: 80,
+    questions: [
+      {
+        id: 1,
+        text: "What is the first step in case of fire?",
+        options: ["Run", "Scream", "Activate Alarm", "Hide"],
+        correctOption: 2,
+        points: 10
+      },
+      {
+        id: 2,
+        text: "PPE stands for:",
+        options: ["Personal Protective Equipment", "Public People Eater", "Private Property Entry", "None"],
+        correctOption: 0,
+        points: 10
+      }
+    ]
+  },
+  {
+    id: 2,
+    courseId: 2,
+    title: "Hazard Identification Quiz",
+    passingScore: 70,
+    questions: [
+      {
+        id: 1,
+        text: "Which is a physical hazard?",
+        options: ["Bacteria", "Noise", "Stress", "Virus"],
+        correctOption: 1,
+        points: 10
+      }
+    ]
+  }
+];
+
+// Keep dummyTrainings for backward compatibility if needed, or alias it
+export const dummyTrainings = dummyCourses;
 
 export const dummyHazards = [
   {

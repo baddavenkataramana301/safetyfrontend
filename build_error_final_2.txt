@@ -1,0 +1,150 @@
+﻿
+> vite_react_shadcn_js@0.0.0 build
+> vite build
+
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+transforming...
+node.exe : 
+Browserslist: 
+browsers data 
+(caniuse-lite) is 6 
+months old. Please 
+run:
+At C:\Program Files\n
+odejs\npm.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : 
+NotSpecifi    ed: 
+(Browserslist:     
+b...ld. Please ru    
+n::String) [], Rem   
+ oteException
+    + 
+FullyQualifiedEr    
+rorId : NativeComm   
+ andError
+ 
+  npx update-browsers
+list-db@latest
+  Why you should do 
+it regularly: https:/
+/github.com/browsersl
+ist/update-db#readme
+[32mΓ£ô[39m 2985 modules transformed.
+[31mx[39m Build 
+failed in 11.34s
+[31merror during 
+build:
+[31msrc/pages/Traini
+ng.jsx (4:7): 
+"default" is not 
+exported by "src/comp
+onents/layout/Dashboa
+rdLayout.jsx", 
+imported by "src/page
+s/Training.jsx".[31m
+file: [36mC:/Users/s
+aiku/OneDrive/Desktop
+/safetyfrontend/src/p
+ages/Training.jsx:4:7
+[31m
+[33m
+2: import { useAuth 
+} from "@/contexts/Au
+thContext";
+3: import { 
+dummyCourses } from 
+"@/data";
+4: import 
+DashboardLayout from 
+"@/components/layout/
+DashboardLayout";
+          ^
+5: import CourseList 
+from "@/components/tr
+aining/CourseList";
+6: import 
+CoursePlayer from "@/
+components/training/C
+oursePlayer";
+[31m
+    at 
+getRollupError (file:
+///C:/Users/saiku/One
+Drive/Desktop/safetyf
+rontend/node_modules/
+rollup/dist/es/shared
+/parseAst.js:395:41)
+    at error (file://
+/C:/Users/saiku/OneDr
+ive/Desktop/safetyfro
+ntend/node_modules/ro
+llup/dist/es/shared/p
+arseAst.js:391:42)
+    at Module.error (
+file:///C:/Users/saik
+u/OneDrive/Desktop/sa
+fetyfrontend/node_mod
+ules/rollup/dist/es/s
+hared/node-entry.js:1
+5535:16)
+    at 
+Module.traceVariable 
+(file:///C:/Users/sai
+ku/OneDrive/Desktop/s
+afetyfrontend/node_mo
+dules/rollup/dist/es/
+shared/node-entry.js:
+15984:29)
+    at ModuleScope.fi
+ndVariable (file:///C
+:/Users/saiku/OneDriv
+e/Desktop/safetyfront
+end/node_modules/roll
+up/dist/es/shared/nod
+e-entry.js:13770:39)
+    at ReturnValueSco
+pe.findVariable (file
+:///C:/Users/saiku/On
+eDrive/Desktop/safety
+frontend/node_modules
+/rollup/dist/es/share
+d/node-entry.js:5252:
+38)
+    at FunctionBodySc
+ope.findVariable (fil
+e:///C:/Users/saiku/O
+neDrive/Desktop/safet
+yfrontend/node_module
+s/rollup/dist/es/shar
+ed/node-entry.js:5252
+:38)
+    at 
+Identifier.bind (file
+:///C:/Users/saiku/On
+eDrive/Desktop/safety
+frontend/node_modules
+/rollup/dist/es/share
+d/node-entry.js:5035:
+40)
+    at 
+CallExpression.bind (
+file:///C:/Users/saik
+u/OneDrive/Desktop/sa
+fetyfrontend/node_mod
+ules/rollup/dist/es/s
+hared/node-entry.js:2
+851:28)
+    at 
+CallExpression.bind (
+file:///C:/Users/saik
+u/OneDrive/Desktop/sa
+fetyfrontend/node_mod
+ules/rollup/dist/es/s
+hared/node-entry.js:1
+1235:15)[39m
