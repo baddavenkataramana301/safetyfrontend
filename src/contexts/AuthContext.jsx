@@ -1,18 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { dummyUsers } from "@/data";
+import { dummyUsers } from "@/data.js";
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState({
-    primary: "#FFB703",
-    secondary: "#023047",
-    accent: "#FB8500",
-    danger: "#D00000",
-    background: "#EAEAEA",
-    text: "#121212",
+    primary: "#2563EB",
+    secondary: "#1E293B",
+    accent: "#F59E0B",
+    danger: "#EF4444",
+    background: "#F8FAFC",
+    text: "#0F172A",
   });
   const navigate = useNavigate();
 

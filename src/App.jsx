@@ -28,8 +28,10 @@ import Training from "./pages/Training";
 import Alerts from "./pages/Alerts";
 import Rewards from "./pages/Rewards";
 import Unauthorized from "./pages/Unauthorized";
+import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
+
 
 const queryClient = new QueryClient();
 
@@ -225,6 +227,15 @@ const App = () => (
                     allowedRoles={["admin", "safety_manager", "employee"]}
                   >
                     <Rewards />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/ai-assessment"
+                element={
+                  <ProtectedRoute>
+                    <Index />
                   </ProtectedRoute>
                 }
               />

@@ -125,3 +125,94 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* AI Assessment Custom Styles */
+.panel {
+  @apply bg-card text-card-foreground rounded-xl shadow-lg p-6 mb-6 border border-border transition-all duration-300;
+  backdrop-filter: blur(10px);
+}
+
+.panel-title {
+  @apply text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2;
+}
+
+.form-group {
+  @apply mb-4;
+}
+
+.form-label {
+  @apply block text-sm font-medium mb-2 opacity-80;
+}
+
+.file-upload {
+  @apply border-2 border-dashed border-border rounded-lg p-4 transition-all duration-200 cursor-pointer hover:border-primary/50 hover:bg-muted/50;
+}
+
+textarea {
+  @apply w-full p-3 rounded-lg bg-background border border-input focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all duration-200 resize-none;
+}
+
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg active:scale-95;
+}
+
+.interactive-btn {
+  @apply shadow-sm hover:shadow active:scale-95;
+}
+
+.risk-badge {
+  @apply px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider;
+}
+
+.risk-low {
+  @apply bg-success/20 text-success border border-success/30;
+}
+
+.risk-medium {
+  @apply bg-warning/20 text-warning border border-warning/30;
+}
+
+.risk-high {
+  @apply bg-destructive/20 text-destructive border border-destructive/30;
+}
+
+.warning-banner {
+  @apply bg-destructive/10 border-l-4 border-destructive p-4 my-4 rounded flex items-start gap-3;
+}
+
+.hira-table {
+  @apply w-full text-left border-collapse;
+}
+
+.hira-table th, .hira-table td {
+  @apply p-2 border-b border-border;
+}
+
+.table-container {
+  @apply overflow-x-auto rounded-lg border border-border;
+}
+
+.control-item {
+  @apply flex items-start gap-2 py-2 border-b border-border last:border-0;
+}
+
+.control-type {
+  @apply font-bold text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground uppercase;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.btn-menu:hover {
+  @apply bg-muted;
+}

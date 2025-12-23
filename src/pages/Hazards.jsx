@@ -55,11 +55,15 @@ import {
   Send,
   Users,
   Shield,
+  Sparkles,
+  Brain,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { dummyUsers } from "@/data";
 import { createHazardNotification } from "@/lib/notificationUtils";
+import InputPanel from "./InputPanel";
+import ResultsPanel from "./ResultsPanel";
 
 const Hazards = () => {
   const { user } = useAuth();
@@ -90,6 +94,9 @@ const Hazards = () => {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [assigningHazard, setAssigningHazard] = useState(null);
+  const [isAnalysisDialogOpen, setIsAnalysisDialogOpen] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState(null);
 
   // Load hazards from localStorage on component mount
   useEffect(() => {
@@ -340,12 +347,12 @@ const Hazards = () => {
       hazards.map((hazard) =>
         hazard.id === viewingHazard.id
           ? {
-              ...hazard,
-              status: "Pending",
-              adminApproval: "approved",
-              managerApproval: "pending",
-              supervisorApproval: "pending",
-            }
+            ...hazard,
+            status: "Pending",
+            adminApproval: "approved",
+            managerApproval: "pending",
+            supervisorApproval: "pending",
+          }
           : hazard
       )
     );
@@ -370,10 +377,10 @@ const Hazards = () => {
       user?.role === "admin"
         ? "adminApproval"
         : user?.role === "manager"
-        ? "managerApproval"
-        : user?.role === "supervisor"
-        ? "supervisorApproval"
-        : null;
+          ? "managerApproval"
+          : user?.role === "supervisor"
+            ? "supervisorApproval"
+            : null;
 
     if (!approvalField) return;
 
@@ -383,15 +390,15 @@ const Hazards = () => {
       hazards.map((hazard) =>
         hazard.id === viewingHazard.id
           ? {
-              ...hazard,
-              [approvalField]: newStatus,
-              ...(action === "approve" && {
-                priority: approvalData.priority,
-                timeline: approvalData.timeline,
-                assignedTeam: approvalData.assignedTeam,
-                approvalRemarks: approvalData.remarks,
-              }),
-            }
+            ...hazard,
+            [approvalField]: newStatus,
+            ...(action === "approve" && {
+              priority: approvalData.priority,
+              timeline: approvalData.timeline,
+              assignedTeam: approvalData.assignedTeam,
+              approvalRemarks: approvalData.remarks,
+            }),
+          }
           : hazard
       )
     );
@@ -513,6 +520,36 @@ const Hazards = () => {
     return matchesSearch;
   });
 
+  const handlePerformAssessment = async (data) => {
+    setIsAnalyzing(true);
+    try {
+      const formData = new FormData();
+      if (data.text) formData.append('text', data.text);
+      if (data.image) formData.append('image', data.image);
+      if (data.audio) formData.append('audio', data.audio);
+
+      const response = await fetch('http://127.0.0.1:8000/assess', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Assessment failed");
+
+      const result = await response.json();
+      setAnalysisResults(result);
+      toast.success("AI Safety Analysis completed!");
+    } catch (err) {
+      toast.error("Error during safety analysis: " + err.message);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleResetAnalysis = () => {
+    setAnalysisResults(null);
+    setIsAnalyzing(false);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -529,109 +566,122 @@ const Hazards = () => {
                 : "Review and approve workplace hazard reports"}
             </p>
           </div>
-          {user?.role === "employee" && (
-            <Dialog
-              open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            {/* AI Analysis Button - Available for all users */}
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none border-primary text-primary hover:bg-primary/10 shadow-sm"
+              onClick={() => setIsAnalysisDialogOpen(true)}
             >
-              <DialogTrigger asChild>
-                <Button className="w-full sm:w-auto">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Report Hazard
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Report New Hazard</DialogTitle>
-                  <DialogDescription>
-                    Fill in the details of the hazard you've identified
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="type">Hazard Type</Label>
-                      <Select
-                        value={formData.type}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, type: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Slip/Trip">
-                            Slip/Trip/Fall
-                          </SelectItem>
-                          <SelectItem value="Electrical">Electrical</SelectItem>
-                          <SelectItem value="Chemical">Chemical</SelectItem>
-                          <SelectItem value="Fire">Fire</SelectItem>
-                          <SelectItem value="Machinery">Machinery</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        value={formData.location}
-                        onChange={(e) =>
-                          setFormData({ ...formData, location: e.target.value })
-                        }
-                        placeholder="e.g., Warehouse A"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Severity Level</Label>
-                    <div className="flex gap-2">
-                      {["Low", "Medium", "High", "Critical"].map((level) => (
-                        <Button
-                          key={level}
-                          type="button"
-                          variant={
-                            formData.severity === level ? "default" : "outline"
-                          }
-                          className="flex-1"
-                          onClick={() =>
-                            setFormData({ ...formData, severity: level })
+              <Brain className="mr-2 h-4 w-4" />
+              AI Analysis
+            </Button>
+
+            {/* Report Hazard Button - Only for employees */}
+            {user?.role === "employee" && (
+              <Dialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button className="flex-1 sm:flex-none">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Report Hazard
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Report New Hazard</DialogTitle>
+                    <DialogDescription>
+                      Fill in the details of the hazard you've identified
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="type">Hazard Type</Label>
+                        <Select
+                          value={formData.type}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, type: value })
                           }
                         >
-                          {level}
-                        </Button>
-                      ))}
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Slip/Trip">
+                              Slip/Trip/Fall
+                            </SelectItem>
+                            <SelectItem value="Electrical">Electrical</SelectItem>
+                            <SelectItem value="Chemical">Chemical</SelectItem>
+                            <SelectItem value="Fire">Fire</SelectItem>
+                            <SelectItem value="Machinery">Machinery</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="location">Location</Label>
+                        <Input
+                          id="location"
+                          value={formData.location}
+                          onChange={(e) =>
+                            setFormData({ ...formData, location: e.target.value })
+                          }
+                          placeholder="e.g., Warehouse A"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Severity Level</Label>
+                      <div className="flex gap-2">
+                        {["Low", "Medium", "High", "Critical"].map((level) => (
+                          <Button
+                            key={level}
+                            type="button"
+                            variant={
+                              formData.severity === level ? "default" : "outline"
+                            }
+                            className="flex-1"
+                            onClick={() =>
+                              setFormData({ ...formData, severity: level })
+                            }
+                          >
+                            {level}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
+                        placeholder="Describe the hazard in detail..."
+                        rows={4}
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsCreateDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button onClick={handleCreate}>Submit Hazard Report</Button>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="Describe the hazard in detail..."
-                      rows={4}
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsCreateDialogOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleCreate}>Submit Hazard Report</Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
 
         <Card>
@@ -651,13 +701,12 @@ const Hazards = () => {
               {filteredHazards.map((hazard) => (
                 <Card
                   key={hazard.id}
-                  className={`hover:shadow-md transition-shadow w-full ${
-                    hazard.status === "Pending"
-                      ? "border-l-4 border-l-warning"
-                      : hazard.status === "Open"
+                  className={`hover:shadow-md transition-shadow w-full ${hazard.status === "Pending"
+                    ? "border-l-4 border-l-warning"
+                    : hazard.status === "Open"
                       ? "border-l-4 border-l-destructive"
                       : ""
-                  }`}
+                    }`}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -1429,6 +1478,33 @@ const Hazards = () => {
             </DialogContent>
           </Dialog>
         )}
+        {/* AI Analysis Dialog */}
+        <Dialog open={isAnalysisDialogOpen} onOpenChange={setIsAnalysisDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-2xl">
+                <Brain className="h-6 w-6 text-primary" />
+                Intelligent Safety Guard
+              </DialogTitle>
+              <DialogDescription>
+                Use AI to identify hazards and generate risk assessments from text, photos, or voice notes.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {!analysisResults ? (
+                <InputPanel
+                  onAssess={handlePerformAssessment}
+                  isLoading={isAnalyzing}
+                />
+              ) : (
+                <ResultsPanel
+                  results={analysisResults}
+                  onReset={handleResetAnalysis}
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

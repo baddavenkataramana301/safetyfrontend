@@ -15,6 +15,7 @@ import {
   LogOut,
   ChevronDown,
   ShieldAlert,
+  Bot,
   UserCheck,
   Award,
 } from "lucide-react";
@@ -48,6 +49,7 @@ export const Sidebar = () => {
           { to: "/groups", icon: UserCheck, label: "My Groups" },
           { to: "/hazards", icon: AlertTriangle, label: "HIRA" },
           { to: "/checklists", icon: CheckSquare, label: "Checklists" },
+          { to: "/ai-assessment", icon: Bot, label: "Safety AI" },
           { to: "/rewards", icon: Award, label: "Rewards" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
           // Analytics moved into Dashboard
@@ -63,6 +65,7 @@ export const Sidebar = () => {
           { to: "/groups", icon: UserCheck, label: "My Groups" },
           { to: "/hazards", icon: AlertTriangle, label: "HIRA" },
           { to: "/checklists", icon: CheckSquare, label: "Checklists" },
+          { to: "/ai-assessment", icon: Bot, label: "Safety AI" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
           // Analytics moved into Dashboard
           { to: "/alerts", icon: ShieldAlert, label: "Alerts" },
@@ -71,6 +74,7 @@ export const Sidebar = () => {
         const items = [
           { to: "/groups", icon: UserCheck, label: "My Groups" },
           { to: "/hazards", icon: AlertTriangle, label: "Report HIRA" },
+          { to: "/ai-assessment", icon: Bot, label: "Safety AI" },
           { to: "/alerts", icon: ShieldAlert, label: "Alerts" },
           { to: "/rewards", icon: Award, label: "My Rewards" },
           // { to: "/notifications", icon: Bell, label: "Notifications" },
@@ -123,7 +127,7 @@ export const Sidebar = () => {
                   "flex items-center gap-2 md:gap-3 px-2 md:px-4 py-3 rounded-lg transition-all duration-200",
                   "text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                   isActive &&
-                    "bg-sidebar-accent text-sidebar-foreground font-medium"
+                  "bg-sidebar-accent text-sidebar-foreground font-medium"
                 )
               }
               onClick={() => {
